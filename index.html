@@ -55,7 +55,6 @@
             transition: background 0.3s ease;
         }
 
-        /* SECURE LOGIN SCREEN */
         #loginScreen {
             position: fixed;
             top: 0;
@@ -634,7 +633,6 @@
 </head>
 <body>
 
-    <!-- SECURE LOGIN SCREEN -->
     <div id="loginScreen">
         <div class="login-card">
             <div class="logo-icon" style="margin: 0 auto 16px auto;">✈</div>
@@ -643,12 +641,11 @@
             <form onsubmit="handleLogin(event)">
                 <input type="password" id="accessPass" class="login-input" placeholder="Enter security access password..." required>
                 <button type="submit" class="login-btn">Authenticate Stream</button>
-                <div class="login-error" id="loginError">Invalid access credentials or account suspended.</div>
+                <div class="login-error" id="loginError">Invalid access credentials.</div>
             </form>
         </div>
     </div>
 
-    <!-- MAIN APP CONTAINER -->
     <div id="appContainer">
 
         <div id="global-tooltip">
@@ -782,7 +779,7 @@
             const pass = document.getElementById('accessPass').value;
             
             try {
-                const res = await fetch('http://127.0.0.1:8000/api/auth', {
+                const res = await fetch('/api/auth', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({password: pass})
@@ -794,11 +791,9 @@
                     document.getElementById('appContainer').style.display = 'block';
                     initApp();
                 } else {
-                    document.getElementById('loginError').textContent = data.message || "Access denied.";
                     document.getElementById('loginError').style.display = 'block';
                 }
             } catch (err) {
-                document.getElementById('loginError').textContent = "Server connection error.";
                 document.getElementById('loginError').style.display = 'block';
             }
         }
@@ -871,7 +866,7 @@
         async function initApp() {
             appendLog("Starting FIDS client initialization...");
             try {
-                const dbRes = await fetch('http://127.0.0.1:8000/api/database');
+                const dbRes = await fetch('/api/database');
                 const dbData = await dbRes.json();
                 aircraftDb = dbData.aircraft || {};
                 airlineDb = dbData.airlines || {};
@@ -886,7 +881,7 @@
 
         async function fetchFlights() {
             try {
-                const response = await fetch('http://127.0.0.1:8000/api/flights');
+                const response = await fetch('/api/flights');
                 if (!response.ok) throw new Error('Failed to fetch telemetry data');
                 const data = await response.json();
                 allFlights = data.flights || [];
