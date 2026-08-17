@@ -1,2 +1,10 @@
 certifi==2026.7.22
 wheel==0.47.0
+fastapi
+uvicorn
+requests
+beautifulsoup4
+schedule
+twilio
+certifi
+wheel
