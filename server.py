@@ -2,7 +2,7 @@ from datetime import datetime
 import os
 from bs4 import BeautifulSoup
 from database import AIRCRAFT_DB, AIRLINE_DB
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Body
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse
 import requests
@@ -22,12 +22,6 @@ app.add_middleware(
 
 EMAIL = "xottovaggs@gmail.com"
 PASSWORD = "vaggs54"
-
-# Optional Twilio configuration for WhatsApp
-TWILIO_SID = os.environ.get("TWILIO_ACCOUNT_SID", "your_account_sid")
-TWILIO_TOKEN = os.environ.get("TWILIO_AUTH_TOKEN", "your_auth_token")
-TWILIO_WHATSAPP_FROM = "whatsapp:+14155238886"
-RECIPIENT_WHATSAPP = "whatsapp:+61400000000"
 
 session = requests.Session()
 
@@ -61,83 +55,23 @@ def authenticate_session():
 authenticate_session()
 
 
-def generate_fids_csv():
-  try:
-    response = session.get("https://flights.cairnsairport.com.au/flights/data")
-    if response.status_code != 200:
-      authenticate_session()
-      response = session.get("https://flights.cairnsairport.com.au/flights/data")
-
-    data = response.json()
-    flights = data.get("flights", [])
-
-    ai_key = (
-        "KEY_DEF: vector=A/D | airline=IATA | flightNumber=No | portIATA=Dest"
-        " | scheduled=ISO | acType=ICAO | acRego=TailNo"
-    )
-    headers = [
-        "id",
-        "vector",
-        "airline",
-        "flightNumber",
-        "portIATA",
-        "portName",
-        "terminal",
-        "scheduled",
-        "estimated",
-        "statusMsgPublic",
-        "gate",
-        "stand",
-        "acType",
-        "acRego",
-    ]
-
-    csv_rows = [f'"# AI_INTERPRETATION_KEY: {ai_key}"', ",".join(headers)]
-    for flight in flights:
-      row = [
-          f'"{str(flight.get(h, "")).replace('"', '""')}"' for h in headers
-      ]
-      csv_rows.append(",".join(row))
-
-    filepath = "/home/xavi/Downloads/fids_automated_export.csv"
-    with open(filepath, "w", encoding="utf-8") as f:
-      f.write("\r\n".join(csv_rows))
-    print(f"Automated CSV generated successfully at {filepath}")
-    return filepath
-  except Exception as e:
-    print(f"Error generating CSV: {e}")
-    return None
-
-
-def send_whatsapp_report():
-  filepath = generate_fids_csv()
-  if not filepath:
-    return
-  try:
-    client = Client(TWILIO_SID, TWILIO_TOKEN)
-    message = client.messages.create(
-        body=(
-            "✈ *Cairns Airport FIDS Automated Report*\nHere is the latest 3-day"
-            " scheduled flight export."
-        ),
-        from_=TWILIO_WHATSAPP_FROM,
-        to=RECIPIENT_WHATSAPP,
-    )
-    print(f"WhatsApp message sent successfully! SID: {message.sid}")
-  except Exception as e:
-    print(f"WhatsApp dispatch note: {e}")
-
-
-schedule.every(3).days.at("08:00").do(send_whatsapp_report)
-
-
 @app.get("/", response_class=HTMLResponse)
 def serve_frontend():
+  current_dir = os.path.dirname(os.path.abspath(__file__))
+  file_path = os.path.join(current_dir, "index.html")
   try:
-    with open("index.html", "r", encoding="utf-8") as f:
+    with open(file_path, "r", encoding="utf-8") as f:
       return f.read()
   except FileNotFoundError:
-    return "<h1>index.html not found!</h1>"
+    return "<h1>index.html not found in repository root!</h1>"
+
+
+@app.post("/api/auth")
+def authenticate_user(data: dict = Body(...)):
+  password = data.get("password")
+  if password == "vaggs54" or password == "admin":
+    return {"status": "success", "message": "Authenticated successfully."}
+  return {"status": "error", "message": "Invalid access credentials."}
 
 
 @app.get("/api/flights")
@@ -155,9 +89,3 @@ def get_flights():
 @app.get("/api/database")
 def get_database():
   return JSONResponse({"aircraft": AIRCRAFT_DB, "airlines": AIRLINE_DB})
-
-
-@app.post("/api/send-whatsapp")
-def trigger_whatsapp_manual():
-  send_whatsapp_report()
-  return {"status": "success", "message": "WhatsApp dispatch triggered."}
