@@ -22,9 +22,10 @@ PASSWORD = "vaggs54"
 
 session = requests.Session()
 
-# Persistent user store: email -> {status: 'pending'|'normal'|'suspended', name: str}
+# Shared persistent user store pre-populated with an example pending user for testing
 USER_STORE = {
-    "xottovaggs@gmail.com": {"name": "Xavi (Admin)", "status": "normal"}
+    "xottovaggs@gmail.com": {"name": "Xavi (Admin)", "status": "normal"},
+    "testuser@gmail.com": {"name": "Test Aviator", "status": "pending"},
 }
 
 
@@ -81,13 +82,10 @@ def register_user(data: dict = Body(...)):
         "message": "Account already exists. Please log in.",
     }
 
-  # Default new accounts to 'pending' awaiting admin review
   USER_STORE[email] = {"name": name, "status": "pending"}
   return {
       "status": "success",
-      "message": (
-          "Account registered successfully! Awaiting administrator approval."
-      ),
+      "message": "Registration received. Please wait for admin approval.",
   }
 
 
@@ -99,22 +97,22 @@ def login_user(data: dict = Body(...)):
   if not user:
     return {
         "status": "error",
-        "message": "Account not found. Please sign up first.",
+        "message": "Account not found. Please create an account.",
     }
 
   if user["status"] == "pending":
     return {
         "status": "pending",
         "message": (
-            "Your account is pending review by the administrator. Please"
-            " check back later."
+            "Your account is awaiting approval from Cairns Airport"
+            " administration."
         ),
     }
 
   if user["status"] == "suspended":
     return {
         "status": "error",
-        "message": "Your account has been suspended by the administrator.",
+        "message": "This account has been suspended.",
     }
 
   return {
@@ -129,7 +127,7 @@ def admin_login(data: dict = Body(...)):
   password = data.get("password")
   if password == "vaggs54":
     return {"status": "success", "message": "Admin authenticated."}
-  return {"status": "error", "message": "Invalid admin password."}
+  return {"status": "error", "message": "Incorrect administrator password."}
 
 
 @app.get("/api/admin/users")
@@ -140,14 +138,23 @@ def admin_get_users():
 @app.post("/api/admin/set-status")
 def admin_set_status(data: dict = Body(...)):
   email = data.get("email", "").strip().lower()
-  status = data.get("status")  # 'normal', 'pending', 'suspended'
+  status = data.get("status")
   if email in USER_STORE and status in ["normal", "pending", "suspended"]:
     USER_STORE[email]["status"] = status
     return {
         "status": "success",
-        "message": f"Updated {email} status to {status}.",
+        "message": f"Updated status for {email}.",
     }
-  return {"status": "error", "message": "User not found or invalid status."}
+  return {"status": "error", "message": "User not found."}
+
+
+@app.post("/api/admin/delete-user")
+def admin_delete_user(data: dict = Body(...)):
+  email = data.get("email", "").strip().lower()
+  if email in USER_STORE:
+    del USER_STORE[email]
+    return {"status": "success", "message": f"Deleted user {email}."}
+  return {"status": "error", "message": "User not found."}
 
 
 @app.get("/api/flights")

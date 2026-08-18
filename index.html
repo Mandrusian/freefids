@@ -3,59 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cairns Airport - FIDS Command Center</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <title>Cairns Airport Flight Information Display System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-primary: #0a0c10;
-            --bg-secondary: #12161f;
-            --bg-glass: rgba(18, 22, 31, 0.85);
+            --bg-primary: #0f141c;
+            --bg-secondary: #182030;
             --border-color: rgba(255, 255, 255, 0.08);
-            --border-hover: rgba(56, 189, 248, 0.4);
-            --text-main: #f1f5f9;
+            --text-main: #f8fafc;
             --text-muted: #94a3b8;
-            --accent-blue: #38bdf8;
-            --accent-glow: rgba(56, 189, 248, 0.2);
-            --success: #34d399;
-            --warning: #fbbf24;
-            --danger: #f87171;
-            --card-radius: 16px;
+            --accent: #0284c7;
+            --accent-hover: #0369a1;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --radius: 10px;
         }
 
         body.theme-navy {
-            --bg-primary: #070b14;
-            --bg-secondary: #0f172a;
-            --accent-blue: #3b82f6;
-            --accent-glow: rgba(59, 130, 246, 0.3);
+            --bg-primary: #0b1120;
+            --bg-secondary: #1e293b;
+            --accent: #3b82f6;
         }
 
         body.theme-mono {
-            --bg-primary: #050505;
-            --bg-secondary: #111111;
-            --accent-blue: #e2e8f0;
-            --accent-glow: rgba(226, 232, 240, 0.2);
-            --success: #ffffff;
+            --bg-primary: #09090b;
+            --bg-secondary: #18181b;
+            --accent: #71717a;
+            --success: #fafafa;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-family: 'Inter', sans-serif;
         }
 
         body {
             background-color: var(--bg-primary);
             color: var(--text-main);
             min-height: 100vh;
-            overflow-x: hidden;
-            background-image: 
-                radial-gradient(circle at 10% 10%, var(--accent-glow) 0%, transparent 40%),
-                radial-gradient(circle at 90% 90%, rgba(14, 165, 233, 0.03) 0%, transparent 40%);
-            transition: background 0.3s ease;
         }
 
-        /* AUTH & LOGIN SCREENS */
+        /* Clean, Professional Auth Screen */
         #authScreen {
             position: fixed;
             top: 0;
@@ -72,80 +63,96 @@
         .auth-card {
             background: var(--bg-secondary);
             border: 1px solid var(--border-color);
-            padding: 40px;
-            border-radius: 20px;
+            padding: 36px;
+            border-radius: var(--radius);
             width: 100%;
-            max-width: 440px;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.8);
-            text-align: center;
+            max-width: 400px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
         }
 
-        .auth-card h2 {
-            font-size: 22px;
-            font-weight: 700;
-            margin-bottom: 8px;
+        .auth-header {
+            margin-bottom: 24px;
         }
 
-        .auth-card p {
+        .auth-header h2 {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 4px;
+        }
+
+        .auth-header p {
             font-size: 13px;
             color: var(--text-muted);
-            margin-bottom: 24px;
-            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 6px;
         }
 
         .auth-input {
             width: 100%;
             background: var(--bg-primary);
             border: 1px solid var(--border-color);
-            padding: 14px 16px;
-            border-radius: 12px;
+            padding: 10px 14px;
+            border-radius: 6px;
             color: var(--text-main);
             font-size: 14px;
-            margin-bottom: 16px;
-            transition: all 0.3s ease;
+            transition: border-color 0.2s;
         }
 
         .auth-input:focus {
             outline: none;
-            border-color: var(--accent-blue);
-            box-shadow: 0 0 15px var(--accent-glow);
+            border-color: var(--accent);
         }
 
         .auth-btn {
             width: 100%;
-            background: var(--accent-blue);
-            color: var(--bg-primary);
+            background: var(--accent);
+            color: white;
             border: none;
-            padding: 14px;
-            border-radius: 12px;
-            font-weight: 700;
+            padding: 11px;
+            border-radius: 6px;
+            font-weight: 600;
             font-size: 14px;
             cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 0 20px var(--accent-glow);
+            transition: background 0.2s;
+            margin-top: 8px;
         }
 
         .auth-btn:hover {
-            opacity: 0.9;
+            background: var(--accent-hover);
         }
 
-        .auth-toggle {
-            margin-top: 16px;
-            font-size: 12px;
+        .auth-footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 13px;
             color: var(--text-muted);
             cursor: pointer;
         }
 
-        .auth-toggle span {
-            color: var(--accent-blue);
-            font-weight: 600;
+        .auth-footer span {
+            color: var(--accent);
+            font-weight: 500;
         }
 
         .auth-error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
             color: var(--danger);
             font-size: 12px;
-            margin-top: 12px;
-            font-family: 'JetBrains Mono', monospace;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 16px;
             display: none;
         }
 
@@ -153,223 +160,22 @@
             display: none;
         }
 
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 24px 40px;
-            background: var(--bg-glass);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border-color);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .logo-icon {
-            width: 44px;
-            height: 44px;
-            background: linear-gradient(135deg, var(--accent-blue), #2563eb);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-            box-shadow: 0 0 20px var(--accent-glow);
-            animation: pulse-glow 3s infinite ease-in-out;
-        }
-
-        .brand-text h1 {
-            font-size: 20px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-        }
-
-        .brand-text p {
-            font-size: 12px;
-            color: var(--text-muted);
-            font-family: 'JetBrains Mono', monospace;
-        }
-
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .stats-hud {
-            display: flex;
-            gap: 16px;
-        }
-
-        .hud-badge {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            padding: 8px 16px;
-            border-radius: 10px;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-        }
-
-        .hud-badge .label {
-            font-size: 10px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            font-family: 'JetBrains Mono', monospace;
-        }
-
-        .hud-badge .value {
-            font-size: 16px;
-            font-weight: 700;
-            color: var(--accent-blue);
-        }
-
-        .icon-btn {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            color: var(--text-main);
-            width: 42px;
-            height: 42px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .icon-btn:hover {
-            border-color: var(--accent-blue);
-            box-shadow: 0 0 10px var(--accent-glow);
-        }
-
-        .container {
-            max-width: 1440px;
-            margin: 32px auto;
-            padding: 0 32px;
-        }
-
-        .controls-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-            gap: 16px;
-            flex-wrap: wrap;
-        }
-
-        .search-box {
-            position: relative;
-            flex: 1;
-            min-width: 280px;
-        }
-
-        .search-box input {
-            width: 100%;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            padding: 12px 16px 12px 44px;
-            border-radius: 12px;
-            color: var(--text-main);
-            font-size: 14px;
-            transition: all 0.3s ease;
-        }
-
-        .search-box input:focus {
-            outline: none;
-            border-color: var(--accent-blue);
-            box-shadow: 0 0 15px var(--accent-glow);
-        }
-
-        .search-box svg {
-            position: absolute;
-            left: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-muted);
-            width: 18px;
-            height: 18px;
-        }
-
-        .actions-group {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .filter-tabs {
-            display: flex;
-            gap: 6px;
-            background: var(--bg-secondary);
-            padding: 4px;
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-            flex-wrap: wrap;
-        }
-
-        .tab-btn {
-            background: transparent;
-            border: none;
-            color: var(--text-muted);
-            padding: 8px 12px;
-            font-size: 12px;
-            font-weight: 600;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .tab-btn.active, .tab-btn:hover {
-            background: var(--accent-blue);
-            color: var(--bg-primary);
-            box-shadow: 0 0 15px var(--accent-glow);
-        }
-
-        .action-btn {
-            background: rgba(56, 189, 248, 0.1);
-            border: 1px solid rgba(56, 189, 248, 0.3);
-            color: var(--accent-blue);
-            padding: 10px 14px;
-            font-size: 12px;
-            font-weight: 700;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-family: 'JetBrains Mono', monospace;
-        }
-
-        .action-btn:hover {
-            background: var(--accent-blue);
-            color: var(--bg-primary);
-            box-shadow: 0 0 15px var(--accent-glow);
-        }
-
+        /* Feature-Rich Admin Panel Modal */
         .modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(8px);
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 10000;
             opacity: 0;
             visibility: hidden;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
         }
 
         .modal-overlay.active {
@@ -380,128 +186,281 @@
         .modal-card {
             background: var(--bg-secondary);
             border: 1px solid var(--border-color);
-            border-radius: 20px;
+            border-radius: var(--radius);
             width: 90%;
-            max-width: 600px;
-            padding: 32px;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.8);
-            transform: translateY(20px);
-            transition: transform 0.3s ease;
-        }
-
-        .modal-overlay.active .modal-card {
-            transform: translateY(0);
+            max-width: 750px;
+            padding: 28px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
         }
 
         .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
             border-bottom: 1px solid var(--border-color);
             padding-bottom: 12px;
         }
 
         .modal-header h3 {
-            font-size: 18px;
-            font-weight: 700;
+            font-size: 16px;
+            font-weight: 600;
         }
 
         .close-modal {
             background: transparent;
             border: none;
             color: var(--text-muted);
-            font-size: 18px;
+            font-size: 16px;
             cursor: pointer;
         }
 
-        .settings-group {
+        .admin-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
             margin-bottom: 20px;
         }
 
-        .settings-group label {
-            display: block;
-            font-size: 12px;
+        .admin-stat-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            padding: 14px;
+            border-radius: 6px;
+        }
+
+        .admin-stat-card .lbl {
+            font-size: 11px;
             color: var(--text-muted);
-            margin-bottom: 8px;
-            font-family: 'JetBrains Mono', monospace;
             text-transform: uppercase;
         }
 
-        .theme-options {
-            display: flex;
-            gap: 12px;
-        }
-
-        .theme-opt-btn {
-            flex: 1;
-            background: var(--bg-primary);
-            border: 1px solid var(--border-color);
+        .admin-stat-card .val {
+            font-size: 20px;
+            font-weight: 700;
             color: var(--text-main);
-            padding: 10px;
-            border-radius: 10px;
-            font-weight: 600;
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.2s ease;
+            margin-top: 4px;
         }
 
-        .theme-opt-btn.active {
-            border-color: var(--accent-blue);
-            background: rgba(56, 189, 248, 0.1);
-            color: var(--accent-blue);
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
         }
 
-        .log-terminal {
-            background: #05070a;
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 16px;
-            height: 260px;
-            overflow-y: auto;
-            font-family: 'JetBrains Mono', monospace;
+        .user-table th {
+            text-align: left;
             font-size: 11px;
-            color: var(--success);
-            line-height: 1.6;
+            color: var(--text-muted);
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border-color);
         }
 
-        .log-entry {
-            margin-bottom: 6px;
-            border-bottom: 1px solid rgba(255,255,255,0.03);
-            padding-bottom: 4px;
-        }
-
-        /* Admin User Table */
-        .admin-user-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--bg-primary);
-            padding: 12px 16px;
-            border-radius: 10px;
-            margin-bottom: 8px;
-            border: 1px solid var(--border-color);
+        .user-table td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 13px;
         }
 
         .status-badge {
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 10px;
-            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
             text-transform: uppercase;
+        }
+        .badge-normal { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+        .badge-pending { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+        .badge-suspended { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+
+        .btn-sm {
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+            border: 1px solid var(--border-color);
+            background: var(--bg-primary);
+            color: var(--text-main);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-sm:hover { background: rgba(255,255,255,0.05); }
+        .btn-danger { color: var(--danger); border-color: rgba(239,68,68,0.3); }
+
+        /* Standard Header & App UI */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 32px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--accent);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .brand-text h1 {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .brand-text p {
+            font-size: 11px;
+            color: var(--text-muted);
             font-family: 'JetBrains Mono', monospace;
         }
-        .status-normal { background: rgba(52, 211, 153, 0.1); color: var(--success); }
-        .status-pending { background: rgba(251, 191, 36, 0.1); color: var(--warning); }
-        .status-suspended { background: rgba(248, 113, 113, 0.1); color: var(--danger); }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .hud-badge {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .hud-badge .label {
+            font-size: 9px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .hud-badge .value {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .icon-btn {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        .icon-btn:hover { border-color: var(--accent); }
+
+        .container {
+            max-width: 1400px;
+            margin: 24px auto;
+            padding: 0 24px;
+        }
+
+        .controls-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+            min-width: 260px;
+        }
+
+        .search-box input {
+            width: 100%;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            padding: 10px 14px 10px 38px;
+            border-radius: 6px;
+            color: var(--text-main);
+            font-size: 13px;
+        }
+        .search-box input:focus { outline: none; border-color: var(--accent); }
+        .search-box svg {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            width: 16px;
+            height: 16px;
+        }
+
+        .actions-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 4px;
+            background: var(--bg-secondary);
+            padding: 3px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 6px 10px;
+            font-size: 12px;
+            font-weight: 500;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .tab-btn.active, .tab-btn:hover {
+            background: var(--accent);
+            color: white;
+        }
+
+        .action-btn {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 8px 12px;
+            font-size: 12px;
+            font-weight: 500;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .action-btn:hover { border-color: var(--accent); }
 
         .table-wrapper {
             background: var(--bg-secondary);
             border: 1px solid var(--border-color);
-            border-radius: var(--card-radius);
-            position: relative;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-            animation: fade-in 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            border-radius: var(--radius);
+            overflow: hidden;
         }
 
         table {
@@ -511,269 +470,185 @@
         }
 
         th {
-            background: rgba(18, 22, 31, 0.95);
-            padding: 16px 20px;
+            background: rgba(0,0,0,0.15);
+            padding: 14px 16px;
             font-size: 11px;
             font-family: 'JetBrains Mono', monospace;
             text-transform: uppercase;
             color: var(--text-muted);
             border-bottom: 1px solid var(--border-color);
-            letter-spacing: 0.5px;
         }
 
         td {
-            padding: 16px 20px;
+            padding: 14px 16px;
             border-bottom: 1px solid var(--border-color);
-            font-size: 14px;
-            transition: background 0.2s ease;
-            position: relative;
+            font-size: 13px;
         }
 
-        tbody tr {
-            transition: all 0.2s ease;
-        }
-
-        tbody tr:hover {
-            background: rgba(56, 189, 248, 0.04);
-        }
-
-        tbody tr.rare-military-row {
-            background: rgba(248, 113, 113, 0.12) !important;
-            border-left: 4px solid var(--danger);
-        }
-        tbody tr.rare-military-row:hover {
-            background: rgba(248, 113, 113, 0.2) !important;
-        }
+        tbody tr:hover { background: rgba(255,255,255,0.02); }
+        tbody tr.rare-military-row { background: rgba(239, 68, 68, 0.08) !important; border-left: 3px solid var(--danger); }
 
         #global-tooltip {
             position: fixed;
-            background: rgba(15, 23, 42, 0.96);
-            border: 1px solid var(--accent-blue);
-            backdrop-filter: blur(16px);
-            padding: 12px 16px;
-            border-radius: 12px;
-            width: 250px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.6), 0 0 20px var(--accent-glow);
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            padding: 10px 14px;
+            border-radius: 6px;
+            width: 240px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
             opacity: 0;
             visibility: hidden;
-            transition: opacity 0.15s ease, transform 0.15s ease;
+            transition: opacity 0.15s ease;
             z-index: 99999;
             pointer-events: none;
-            text-align: left;
         }
+        #global-tooltip.visible { opacity: 1; visibility: visible; }
+        #global-tooltip h4 { font-size: 12px; font-weight: 600; margin-bottom: 3px; }
+        #global-tooltip p { font-size: 11px; color: var(--text-muted); line-height: 1.4; }
 
-        #global-tooltip.visible {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        #global-tooltip h4 {
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--text-main);
-            margin-bottom: 4px;
-        }
-
-        #global-tooltip p {
-            font-size: 11px;
-            color: var(--text-muted);
-            line-height: 1.4;
-        }
-
-        .tooltip-trigger {
-            cursor: help;
-            border-bottom: 1px dashed var(--accent-blue);
-            display: inline-block;
-        }
-
-        .flight-code {
-            font-family: 'JetBrains Mono', monospace;
-            font-weight: 700;
-            color: var(--accent-blue);
-        }
-
-        .rego-code {
-            font-family: 'JetBrains Mono', monospace;
-            font-weight: 600;
-            color: var(--success);
-            background: rgba(52, 211, 153, 0.08);
-            padding: 2px 6px;
-            border-radius: 4px;
-            border: 1px solid rgba(52, 211, 153, 0.2);
-        }
-
-        .time-box {
-            font-family: 'JetBrains Mono', monospace;
-            font-weight: 600;
-        }
-
-        .date-sub {
-            font-size: 11px;
-            color: var(--text-muted);
-            display: block;
-            font-family: 'JetBrains Mono', monospace;
-        }
-
-        .time-est {
-            color: var(--warning);
-            font-size: 12px;
-            display: block;
-        }
+        .tooltip-trigger { cursor: help; border-bottom: 1px dashed var(--text-muted); }
+        .flight-code { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--accent); }
+        .rego-code { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--success); background: rgba(16,185,129,0.1); padding: 2px 6px; border-radius: 4px; }
+        .time-box { font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+        .date-sub { font-size: 10px; color: var(--text-muted); display: block; }
+        .time-est { color: var(--warning); font-size: 11px; display: block; }
 
         .status-pill {
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            padding: 6px 12px;
-            border-radius: 20px;
+            padding: 4px 10px;
+            border-radius: 12px;
             font-size: 11px;
-            font-weight: 700;
+            font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
+        .status-on-time { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+        .status-delayed { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+        .status-neutral { background: rgba(255, 255, 255, 0.05); color: var(--text-muted); }
 
-        .status-on-time { background: rgba(52, 211, 153, 0.1); color: var(--success); border: 1px solid rgba(52, 211, 153, 0.2); }
-        .status-delayed { background: rgba(251, 191, 36, 0.2); color: var(--warning); border: 1px solid rgba(251, 191, 36, 0.4); }
-        .status-neutral { background: rgba(255, 255, 255, 0.05); color: var(--text-muted); border: 1px solid rgba(255, 255, 255, 0.1); }
-
-        @keyframes pulse-glow {
-            0%, 100% { box-shadow: 0 0 15px rgba(14, 165, 233, 0.4); }
-            50% { box-shadow: 0 0 25px rgba(14, 165, 233, 0.8); }
-        }
-
-        @keyframes fade-in {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .state-container {
-            text-align: center;
-            padding: 60px 20px;
-            color: var(--text-muted);
-            font-family: 'JetBrains Mono', monospace;
-        }
-
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid var(--border-color);
-            border-top-color: var(--accent-blue);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin: 0 auto 16px auto;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+        .state-container { text-align: center; padding: 50px 20px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+        .spinner { width: 32px; height: 32px; border: 3px solid var(--border-color); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px auto; }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-    <!-- AUTH SCREEN (SIGN UP / LOGIN / ADMIN) -->
+    <!-- Professional Auth Screen -->
     <div id="authScreen">
         <div class="auth-card">
-            <div class="logo-icon" style="margin: 0 auto 16px auto;">✈</div>
-            <h2 id="authTitle">FIDS COMMAND LOGIN</h2>
-            <p id="authSubtitle">SECURE TERMINAL // AUTHORIZED PERSONNEL</p>
+            <div class="auth-header">
+                <h2>Cairns Airport</h2>
+                <p id="authSubtitle">Flight Information Display System</p>
+            </div>
             
+            <div class="auth-error" id="authError"></div>
+
             <form id="authForm" onsubmit="handleAuthSubmit(event)">
-                <div id="nameFieldContainer" style="display: none;">
-                    <input type="text" id="authName" class="auth-input" placeholder="Full Name...">
+                <div class="form-group" id="nameFieldContainer" style="display: none;">
+                    <label>Full Name</label>
+                    <input type="text" id="authName" class="auth-input" placeholder="Enter your name">
                 </div>
-                <input type="email" id="authEmail" class="auth-input" placeholder="Email Address..." required>
-                <input type="password" id="authPass" class="auth-input" placeholder="Password / Admin Key (vaggs54)..." required>
+                <div class="form-group">
+                    <label>Email Address / Admin Key</label>
+                    <input type="text" id="authEmail" class="auth-input" placeholder="name@domain.com or vaggs54" required>
+                </div>
                 
-                <button type="submit" id="authSubmitBtn" class="auth-btn">Access Stream</button>
-                <div class="auth-error" id="authError"></div>
+                <button type="submit" id="authSubmitBtn" class="auth-btn">Sign In</button>
             </form>
 
-            <div class="auth-toggle" id="authToggleText" onclick="toggleAuthMode()">
-                Need an account? <span>Sign Up</span>
+            <div class="auth-footer" id="authToggleText" onclick="toggleAuthMode()">
+                Don't have an account? <span>Create Account</span>
             </div>
         </div>
     </div>
 
-    <!-- ADMIN CENTER MODAL -->
+    <!-- Feature-Rich Admin Center Modal -->
     <div class="modal-overlay" id="adminModal">
         <div class="modal-card">
             <div class="modal-header">
-                <h3>Admin Center // User Management</h3>
+                <h3>Administrator Control Panel</h3>
                 <button class="close-modal" onclick="toggleModal('adminModal', false)">✕</button>
             </div>
-            <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px; font-family: 'JetBrains Mono', monospace;">
-                Approve pending accounts or suspend unauthorized users.
-            </p>
-            <div id="adminUserList" style="max-height: 320px; overflow-y: auto;">
-                <!-- Populated via JS -->
+
+            <div class="admin-stats-grid">
+                <div class="admin-stat-card">
+                    <div class="lbl">Total Users</div>
+                    <div class="val" id="statTotalUsers">0</div>
+                </div>
+                <div class="admin-stat-card">
+                    <div class="lbl">Pending Approvals</div>
+                    <div class="val" id="statPendingUsers" style="color: var(--warning);">0</div>
+                </div>
+                <div class="admin-stat-card">
+                    <div class="lbl">Active Systems</div>
+                    <div class="val" style="color: var(--success);">ONLINE</div>
+                </div>
+            </div>
+
+            <div style="font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 10px; text-transform: uppercase;">
+                Registered Personnel & Access Control
+            </div>
+
+            <div style="max-height: 280px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 6px;">
+                <table class="user-table">
+                    <thead>
+                        <tr>
+                            <th>User Name</th>
+                            <th>Email Address</th>
+                            <th>Status</th>
+                            <th style="text-align: right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminUserTableBody">
+                        <!-- Populated via JS -->
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 
-    <!-- MAIN APP CONTAINER -->
-    <div id="appContainer">
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal-card" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3>Interface Preferences</h3>
+                <button class="close-modal" onclick="toggleModal('settingsModal', false)">✕</button>
+            </div>
+            <div class="form-group">
+                <label>Theme Preset</label>
+                <div style="display: flex; gap: 8px; margin-top: 6px;">
+                    <button class="tab-btn active" style="flex:1;" onclick="setTheme('default', this)">Default</button>
+                    <button class="tab-btn" style="flex:1;" onclick="setTheme('navy', this)">Navy</button>
+                    <button class="tab-btn" style="flex:1;" onclick="setTheme('mono', this)">Mono</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <!-- Main Application UI -->
+    <div id="appContainer">
         <div id="global-tooltip">
             <h4 id="tooltip-title"></h4>
             <p id="tooltip-desc"></p>
-            <div id="tooltip-code" style="margin-top: 6px; font-size: 9px; color: var(--accent-blue); font-family: 'JetBrains Mono', monospace;"></div>
-        </div>
-
-        <div class="modal-overlay" id="settingsModal">
-            <div class="modal-card">
-                <div class="modal-header">
-                    <h3>Interface Settings & Themes</h3>
-                    <button class="close-modal" onclick="toggleModal('settingsModal', false)">✕</button>
-                </div>
-                <div class="settings-group">
-                    <label>Color Theme Preset</label>
-                    <div class="theme-options">
-                        <button class="theme-opt-btn active" id="theme-default" onclick="setTheme('default', this)">Cyber Dark</button>
-                        <button class="theme-opt-btn" id="theme-navy" onclick="setTheme('navy', this)">Deep Navy</button>
-                        <button class="theme-opt-btn" id="theme-mono" onclick="setTheme('mono', this)">Monochrome</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="modal-overlay" id="logModal">
-            <div class="modal-card" style="max-width: 650px;">
-                <div class="modal-header">
-                    <h3>System Telemetry & Activity Log</h3>
-                    <button class="close-modal" onclick="toggleModal('logModal', false)">✕</button>
-                </div>
-                <div class="log-terminal" id="logTerminal">
-                    <div class="log-entry">[00:00:00] [INFO] FIDS Command Center initialized successfully.</div>
-                </div>
-                <div style="margin-top: 16px; display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-size: 11px; color: var(--text-muted);">Status: Active & Polling</span>
-                    <button class="action-btn" onclick="appendLog('Manual diagnostic ping executed.')">Run Diagnostic</button>
-                </div>
-            </div>
+            <div id="tooltip-code" style="margin-top: 4px; font-size: 10px; color: var(--accent); font-family: 'JetBrains Mono', monospace;"></div>
         </div>
 
         <header>
             <div class="brand">
                 <div class="logo-icon">✈</div>
                 <div class="brand-text">
-                    <h1>CAIRNS AIRPORT FIDS</h1>
-                    <p id="userWelcomeBanner">SECURE STREAM</p>
+                    <h1>Cairns Airport FIDS</h1>
+                    <p id="userWelcomeBanner">LIVE FLIGHT TELEMETRY</p>
                 </div>
             </div>
             <div class="header-actions">
-                <div class="stats-hud">
-                    <div class="hud-badge">
-                        <span class="label">Total Loaded</span>
-                        <span class="value" id="total-count">0</span>
-                    </div>
-                    <div class="hud-badge">
-                        <span class="label">System Status</span>
-                        <span class="value" style="color: var(--success);">ONLINE</span>
-                    </div>
+                <div class="hud-badge">
+                    <span class="label">Movements</span>
+                    <span class="value" id="total-count">0</span>
                 </div>
-                <button class="icon-btn" id="adminNavBtn" onclick="openAdminCenter()" title="Admin Center" style="display: none; border-color: var(--warning); color: var(--warning);">👑</button>
-                <button class="icon-btn" onclick="toggleModal('logModal', true)" title="View System Log">📋</button>
-                <button class="icon-btn" onclick="toggleModal('settingsModal', true)" title="Open Settings">⚙</button>
+                <button class="icon-btn" id="adminNavBtn" onclick="openAdminCenter()" title="Admin Panel" style="display: none; border-color: var(--warning); color: var(--warning);">👑</button>
+                <button class="icon-btn" onclick="toggleModal('settingsModal', true)" title="Settings">⚙</button>
             </div>
         </header>
 
@@ -781,7 +656,7 @@
             <div class="controls-bar">
                 <div class="search-box">
                     <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                    <input type="text" id="searchInput" placeholder="Search flight number, airline, destination, rego, or aircraft code..." onkeyup="filterFlights()">
+                    <input type="text" id="searchInput" placeholder="Filter by flight, airline, destination, or registration..." onkeyup="filterFlights()">
                 </div>
                 <div class="actions-group">
                     <div class="filter-tabs">
@@ -791,10 +666,7 @@
                         <button class="tab-btn" onclick="setFilter('military', this)" style="color: var(--danger);">Military</button>
                         <button class="tab-btn" onclick="setFilter('rare', this)" style="color: var(--warning);">Rare</button>
                     </div>
-                    <button class="action-btn" onclick="downloadCSV()">
-                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                        CSV
-                    </button>
+                    <button class="action-btn" onclick="downloadCSV()">Export CSV</button>
                 </div>
             </div>
 
@@ -807,9 +679,9 @@
                             <th>Route</th>
                             <th>Terminal</th>
                             <th>Scheduled</th>
-                            <th>Aircraft Type</th>
-                            <th>Rego</th>
-                            <th>Gate / Stand</th>
+                            <th>Aircraft</th>
+                            <th>Registration</th>
+                            <th>Gate</th>
                             <th>Status</th>
                         </tr>
                     </thead>
@@ -818,7 +690,7 @@
                             <td colspan="9">
                                 <div class="state-container">
                                     <div class="spinner"></div>
-                                    Initializing secure telemetry connection...
+                                    Connecting to Cairns Airport data stream...
                                 </div>
                             </td>
                         </tr>
@@ -843,35 +715,34 @@
 
         function toggleAuthMode() {
             isSignUpMode = !isSignUpMode;
-            document.getElementById('authTitle').textContent = isSignUpMode ? "FIDS ACCOUNT REGISTRATION" : "FIDS COMMAND LOGIN";
-            document.getElementById('authSubtitle').textContent = isSignUpMode ? "CREATE NEW USER PROFILE" : "SECURE TERMINAL // AUTHORIZED PERSONNEL";
+            document.querySelector('.auth-header h2').textContent = isSignUpMode ? "Create Account" : "Cairns Airport";
+            document.getElementById('authSubtitle').textContent = isSignUpMode ? "Request access to FIDS portal" : "Flight Information Display System";
             document.getElementById('nameFieldContainer').style.display = isSignUpMode ? "block" : "none";
-            document.getElementById('authSubmitBtn').textContent = isSignUpMode ? "Submit Registration" : "Access Stream";
-            document.getElementById('authToggleText').innerHTML = isSignUpMode ? "Already have an account? <span>Log In</span>" : "Need an account? <span>Sign Up</span>";
+            document.getElementById('authSubmitBtn').textContent = isSignUpMode ? "Submit Request" : "Sign In";
+            document.getElementById('authToggleText').innerHTML = isSignUpMode ? "Already have an account? <span>Sign In</span>" : "Don't have an account? <span>Create Account</span>";
             document.getElementById('authError').style.display = "none";
         }
 
         async function handleAuthSubmit(e) {
             e.preventDefault();
-            const email = document.getElementById('authEmail').value.trim();
-            const pass = document.getElementById('authPass').value.trim();
-            const name = document.getElementById('authName').value.trim();
+            const inputVal = document.getElementById('authEmail').value.trim();
+            const nameVal = document.getElementById('authName').value.trim();
             const errDiv = document.getElementById('authError');
             errDiv.style.display = 'none';
 
-            // Check if password is admin key
-            if (pass === "vaggs54") {
+            // Master Admin Key Check
+            if (inputVal === "vaggs54") {
                 try {
                     const res = await fetch('/api/admin/login', {
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({password: pass})
+                        body: JSON.stringify({password: inputVal})
                     });
                     const data = await res.json();
                     if (data.status === 'success') {
                         document.getElementById('authScreen').style.display = 'none';
                         document.getElementById('appContainer').style.display = 'block';
-                        document.getElementById('userWelcomeBanner').textContent = "ADMIN COMMAND CENTER // LEVEL 5 ACCESS";
+                        document.getElementById('userWelcomeBanner').textContent = "ADMINISTRATOR PORTAL";
                         document.getElementById('adminNavBtn').style.display = 'flex';
                         initApp();
                         return;
@@ -880,11 +751,16 @@
             }
 
             if (isSignUpMode) {
+                if (!nameVal) {
+                    errDiv.textContent = "Please enter your full name.";
+                    errDiv.style.display = 'block';
+                    return;
+                }
                 try {
                     const res = await fetch('/api/signup', {
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({email, name})
+                        body: JSON.stringify({email: inputVal, name: nameVal})
                     });
                     const data = await res.json();
                     if (data.status === 'success') {
@@ -895,7 +771,7 @@
                         errDiv.style.display = 'block';
                     }
                 } catch(err) {
-                    errDiv.textContent = "Server connection error.";
+                    errDiv.textContent = "Connection error.";
                     errDiv.style.display = 'block';
                 }
             } else {
@@ -903,20 +779,20 @@
                     const res = await fetch('/api/login', {
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({email})
+                        body: JSON.stringify({email: inputVal})
                     });
                     const data = await res.json();
                     if (data.status === 'normal') {
                         document.getElementById('authScreen').style.display = 'none';
                         document.getElementById('appContainer').style.display = 'block';
-                        document.getElementById('userWelcomeBanner').textContent = `USER: ${data.name.toUpperCase()} // STREAM ACTIVE`;
+                        document.getElementById('userWelcomeBanner').textContent = `LOGGED IN AS ${data.name.toUpperCase()}`;
                         initApp();
                     } else {
                         errDiv.textContent = data.message;
                         errDiv.style.display = 'block';
                     }
                 } catch(err) {
-                    errDiv.textContent = "Server connection error.";
+                    errDiv.textContent = "Connection error.";
                     errDiv.style.display = 'block';
                 }
             }
@@ -926,75 +802,70 @@
             try {
                 const res = await fetch('/api/admin/users');
                 const users = await res.json();
-                const listContainer = document.getElementById('adminUserList');
-                listContainer.innerHTML = '';
+                const tbody = document.getElementById('adminUserTableBody');
+                tbody.innerHTML = '';
+
+                let totalCount = 0;
+                let pendingCount = 0;
 
                 for (const [email, info] of Object.entries(users)) {
-                    const row = document.createElement('div');
-                    row.className = 'admin-user-row';
-                    row.innerHTML = `
-                        <div>
-                            <strong>${info.name}</strong><br>
-                            <span style="font-size:11px; color:var(--text-muted); font-family:'JetBrains Mono', monospace;">${email}</span>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <span class="status-badge status-${info.status}">${info.status}</span>
-                            <select onchange="updateUserStatus('${email}', this.value)" style="background:var(--bg-secondary); color:var(--text-main); border:1px solid var(--border-color); padding:4px 8px; border-radius:6px; font-size:11px;">
-                                <option value="pending" ${info.status==='pending'?'selected':''}>Pending</option>
-                                <option value="normal" ${info.status==='normal'?'selected':''}>Normal</option>
-                                <option value="suspended" ${info.status==='suspended'?'selected':''}>Suspended</option>
-                            </select>
-                        </div>
+                    totalCount++;
+                    if (info.status === 'pending') pendingCount++;
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td style="font-weight: 500;">${info.name}</td>
+                        <td style="color: var(--text-muted); font-family: 'JetBrains Mono', monospace; font-size: 12px;">${email}</td>
+                        <td><span class="status-badge badge-${info.status}">${info.status}</span></td>
+                        <td style="text-align: right; display: flex; gap: 6px; justify-content: flex-end;">
+                            ${info.status !== 'normal' ? `<button class="btn-sm" onclick="updateUserStatus('${email}', 'normal')">Approve</button>` : ''}
+                            ${info.status !== 'suspended' ? `<button class="btn-sm btn-danger" onclick="updateUserStatus('${email}', 'suspended')">Suspend</button>` : ''}
+                            <button class="btn-sm btn-danger" onclick="deleteUser('${email}')">Delete</button>
+                        </td>
                     `;
-                    listContainer.appendChild(row);
+                    tbody.appendChild(tr);
                 }
+
+                document.getElementById('statTotalUsers').textContent = totalCount;
+                document.getElementById('statPendingUsers').textContent = pendingCount;
                 toggleModal('adminModal', true);
             } catch(err) {
-                alert("Failed to load user list.");
+                alert("Failed to load user management data.");
             }
         }
 
-        async function updateUserStatus(email, newStatus) {
-            try {
-                await fetch('/api/admin/set-status', {
+        async function updateUserStatus(email, status) {
+            await fetch('/api/admin/set-status', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({email, status})
+            });
+            openAdminCenter();
+        }
+
+        async function deleteUser(email) {
+            if (confirm(`Are you sure you want to delete ${email}?`)) {
+                await fetch('/api/admin/delete-user', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({email, status: newStatus})
+                    body: JSON.stringify({email})
                 });
-                openAdminCenter(); // Refresh list
-            } catch(err) {
-                alert("Failed to update status.");
+                openAdminCenter();
             }
-        }
-
-        function appendLog(message) {
-            const terminal = document.getElementById('logTerminal');
-            const now = new Date().toTimeString().split(' ')[0];
-            const entry = document.createElement('div');
-            entry.className = 'log-entry';
-            entry.textContent = `[${now}] [INFO] ${message}`;
-            terminal.appendChild(entry);
-            terminal.scrollTop = terminal.scrollHeight;
         }
 
         function toggleModal(modalId, show) {
             const modal = document.getElementById(modalId);
-            if (show) {
-                modal.classList.add('active');
-                appendLog(`Opened dialog: ${modalId}`);
-            } else {
-                modal.classList.remove('active');
-            }
+            if (show) modal.classList.add('active');
+            else modal.classList.remove('active');
         }
 
         function setTheme(themeName, btn) {
             document.body.className = '';
             if (themeName === 'navy') document.body.classList.add('theme-navy');
             if (themeName === 'mono') document.body.classList.add('theme-mono');
-
-            document.querySelectorAll('.theme-opt-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('#settingsModal .tab-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            appendLog(`Applied theme preset: ${themeName}`);
         }
 
         function showTooltip(e, title, desc, code) {
@@ -1006,107 +877,83 @@
         }
 
         function updateTooltipPosition(e) {
-            const padding = 15;
-            let left = e.clientX + padding;
-            let top = e.clientY - 80;
-
-            if (left + 270 > window.innerWidth) left = e.clientX - 270 - padding;
-            if (top < 10) top = e.clientY + 20;
-
+            let left = e.clientX + 15;
+            let top = e.clientY - 60;
+            if (left + 250 > window.innerWidth) left = e.clientX - 260;
             tooltip.style.left = `${left}px`;
             tooltip.style.top = `${top}px`;
         }
 
-        function hideTooltip() {
-            tooltip.classList.remove('visible');
-        }
+        function hideTooltip() { tooltip.classList.remove('visible'); }
 
         function formatDateString(isoString) {
             if (!isoString) return '';
             const dateObj = new Date(isoString);
             if (isNaN(dateObj)) return '';
-            const options = { weekday: 'long', day: 'numeric', month: 'long' };
-            const formatted = dateObj.toLocaleDateString('en-AU', options);
-            const parts = dateObj.toLocaleDateString('en-AU', { month: 'numeric', day: 'numeric' });
             const timePart = isoString.split('T')[1]?.substring(0, 5) || '';
-            return { time: timePart, dateStr: `${formatted} (${parts})` };
+            const datePart = dateObj.toLocaleDateString('en-AU', { day: 'numeric', month: 'short' });
+            return { time: timePart, dateStr: datePart };
         }
 
         async function initApp() {
-            appendLog("Starting FIDS client initialization...");
             try {
                 const dbRes = await fetch('/api/database');
                 const dbData = await dbRes.json();
                 aircraftDb = dbData.aircraft || {};
                 airlineDb = dbData.airlines || {};
-                appendLog(`Loaded database definitions.`);
-
                 await fetchFlights();
                 setInterval(fetchFlights, 30000);
             } catch (err) {
-                appendLog(`ERROR: Initialization failed - ${err.message}`);
+                console.error("Init error:", err);
             }
         }
 
         async function fetchFlights() {
             try {
                 const response = await fetch('/api/flights');
-                if (!response.ok) throw new Error('Failed to fetch telemetry data');
                 const data = await response.json();
                 allFlights = data.flights || [];
                 document.getElementById('total-count').textContent = allFlights.length;
-                
                 filterFlights();
-                if (isFirstLoad) {
-                    appendLog(`Successfully established secure stream. Loaded ${allFlights.length} flight records.`);
-                    isFirstLoad = false;
-                }
             } catch (error) {
-                appendLog(`WARNING: Failed to fetch live flight telemetry - ${error.message}`);
+                console.error("Fetch error:", error);
             }
         }
 
         function renderFlights(flights) {
             const tbody = document.getElementById('flightTableBody');
             if (flights.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="9"><div class="state-container">No flight movements match your criteria.</div></td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="9"><div class="state-container">No flight records found.</div></td></tr>`;
                 return;
             }
 
             tbody.innerHTML = flights.map((flight) => {
                 const acTypeKey = flight.acType || '738';
-                const planeInfo = aircraftDb[acTypeKey] || { name: `Aircraft Type [${acTypeKey}]`, desc: "Standard commercial transport aircraft.", rare: false, military: false };
+                const planeInfo = aircraftDb[acTypeKey] || { name: `Aircraft [${acTypeKey}]`, desc: "Standard commercial aircraft.", rare: false, military: false };
                 const airlineCode = flight.airline || '';
-                const airlineInfo = airlineDb[airlineCode] || { name: `Airline Operator [${airlineCode}]`, desc: "Active commercial or defense operator code.", military: false };
+                const airlineInfo = airlineDb[airlineCode] || { name: `Operator [${airlineCode}]`, desc: "Active carrier code.", military: false };
 
                 const isMilitary = Boolean(planeInfo.military || airlineInfo.military);
                 const isRare = Boolean(planeInfo.rare);
                 const rowHighlightClass = (isMilitary || isRare) ? 'rare-military-row' : '';
 
                 const isArrival = flight.vector === 'A';
-                const vectorBadge = isArrival ? '<span style="color: var(--success); font-weight:700;">↓ ARR</span>' : '<span style="color: var(--accent-blue); font-weight:700;">↑ DEP</span>';
+                const vectorBadge = isArrival ? '<span style="color: var(--success); font-weight:650;">↓ ARR</span>' : '<span style="color: var(--accent); font-weight:650;">↑ DEP</span>';
 
                 const rawStatus = (flight.statusMsgPublic || '').trim();
                 let statusClass = 'status-neutral';
-                let statusText = rawStatus;
-
-                if (rawStatus.toLowerCase().includes('delay')) {
-                    statusClass = 'status-delayed';
-                } else if (rawStatus.toLowerCase().includes('bag drop') || rawStatus.toLowerCase().includes('on time') || rawStatus.toLowerCase().includes('boarding')) {
-                    statusClass = 'status-on-time';
-                } else if (!rawStatus) {
-                    statusText = isArrival ? 'Arriving' : 'Departing';
-                }
+                let statusText = rawStatus || (isArrival ? 'Arriving' : 'Departing');
+                if (rawStatus.toLowerCase().includes('delay')) statusClass = 'status-delayed';
+                else if (rawStatus.toLowerCase().includes('on time') || rawStatus.toLowerCase().includes('boarding')) statusClass = 'status-on-time';
 
                 const schedInfo = formatDateString(flight.scheduled);
                 const estInfo = formatDateString(flight.estimated);
-                const regoCode = flight.acRego || 'N/A';
 
                 return `
                     <tr class="${rowHighlightClass}">
                         <td>
                             <span class="tooltip-trigger flight-code" 
-                                  onmouseenter="showTooltip(event, '${airlineInfo.name.replace(/'/g, "\\'")}', '${airlineInfo.desc.replace(/'/g, "\\'")}', 'Operator Code: ${airlineCode}')"
+                                  onmouseenter="showTooltip(event, '${airlineInfo.name.replace(/'/g, "\\'")}', '${airlineInfo.desc.replace(/'/g, "\\'")}', 'Code: ${airlineCode}')"
                                   onmousemove="updateTooltipPosition(event)"
                                   onmouseleave="hideTooltip()">
                                 ${airlineCode}${flight.flightNumber}
@@ -1117,9 +964,7 @@
                             <strong>${flight.portName}</strong><br>
                             <span style="font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace;">${flight.portIATA}</span>
                         </td>
-                        <td>
-                            <span style="font-family: 'JetBrains Mono', monospace; background: rgba(255,255,255,0.05); padding: 2px 8px; border-radius: 6px;">${flight.terminal || 'T2'}</span>
-                        </td>
+                        <td><span style="font-family: 'JetBrains Mono', monospace; background: rgba(255,255,255,0.04); padding: 2px 6px; border-radius: 4px;">${flight.terminal || 'T2'}</span></td>
                         <td>
                             <div class="time-box">
                                 ${schedInfo.time}
@@ -1128,21 +973,17 @@
                             </div>
                         </td>
                         <td>
-                            <span class="tooltip-trigger" style="font-family: 'JetBrains Mono', monospace; color: var(--accent-blue);"
-                                  onmouseenter="showTooltip(event, '${planeInfo.name.replace(/'/g, "\\'")}', '${planeInfo.desc.replace(/'/g, "\\'")}', 'ICAO Code: ${acTypeKey}')"
+                            <span class="tooltip-trigger" style="font-family: 'JetBrains Mono', monospace; color: var(--accent);"
+                                  onmouseenter="showTooltip(event, '${planeInfo.name.replace(/'/g, "\\'")}', '${planeInfo.desc.replace(/'/g, "\\'")}', 'ICAO: ${acTypeKey}')"
                                   onmousemove="updateTooltipPosition(event)"
                                   onmouseleave="hideTooltip()">
                                 ${acTypeKey}
                             </span>
                         </td>
-                        <td><span class="rego-code">${regoCode}</span></td>
-                        <td>
-                            <span style="font-family: 'JetBrains Mono', monospace; font-weight: 600;">Gate ${flight.gate || 'TBD'}</span><br>
-                            <span style="font-size: 10px; color: var(--text-muted);">Stand ${flight.stand || '-'}</span>
-                        </td>
+                        <td><span class="rego-code">${flight.acRego || 'N/A'}</span></td>
+                        <td><span style="font-family: 'JetBrains Mono', monospace;">Gate ${flight.gate || 'TBD'}</span></td>
                         <td>
                             <span class="status-pill ${statusClass}">
-                                <span style="width: 6px; height: 6px; border-radius: 50%; background: currentColor;"></span>
                                 ${statusText}
                             </span>
                         </td>
@@ -1153,7 +994,7 @@
 
         function setFilter(vector, btn) {
             currentFilter = vector;
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.filter-tabs .tab-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             filterFlights();
         }
@@ -1165,7 +1006,6 @@
                 const planeInfo = aircraftDb[acTypeKey] || {};
                 const airlineCode = flight.airline || '';
                 const airlineInfo = airlineDb[airlineCode] || {};
-                
                 const isMilitary = Boolean(planeInfo.military || airlineInfo.military);
                 const isRare = Boolean(planeInfo.rare);
 
@@ -1182,7 +1022,7 @@
         }
 
         function downloadCSV() {
-            if (!allFlights || allFlights.length === 0) return alert("No flight data available.");
+            if (!allFlights || allFlights.length === 0) return alert("No data to export.");
             const headers = ["id", "vector", "airline", "flightNumber", "portIATA", "portName", "terminal", "scheduled", "estimated", "statusMsgPublic", "gate", "stand", "acType", "acRego"];
             let csvRows = [headers.join(",")];
             allFlights.forEach(f => {
@@ -1192,7 +1032,7 @@
             const blob = new Blob([csvRows.join("\r\n")], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.download = `fids_export_${new Date().toISOString().slice(0,10)}.csv`;
+            link.download = `cairns_airport_fids_${new Date().toISOString().slice(0,10)}.csv`;
             link.click();
         }
     </script>
