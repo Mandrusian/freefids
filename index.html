@@ -55,7 +55,8 @@
             transition: background 0.3s ease;
         }
 
-        #loginScreen {
+        /* AUTH & LOGIN SCREENS */
+        #authScreen {
             position: fixed;
             top: 0;
             left: 0;
@@ -68,31 +69,31 @@
             z-index: 99999;
         }
 
-        .login-card {
+        .auth-card {
             background: var(--bg-secondary);
             border: 1px solid var(--border-color);
             padding: 40px;
             border-radius: 20px;
             width: 100%;
-            max-width: 420px;
+            max-width: 440px;
             box-shadow: 0 25px 50px rgba(0,0,0,0.8);
             text-align: center;
         }
 
-        .login-card h2 {
+        .auth-card h2 {
             font-size: 22px;
             font-weight: 700;
             margin-bottom: 8px;
         }
 
-        .login-card p {
+        .auth-card p {
             font-size: 13px;
             color: var(--text-muted);
             margin-bottom: 24px;
             font-family: 'JetBrains Mono', monospace;
         }
 
-        .login-input {
+        .auth-input {
             width: 100%;
             background: var(--bg-primary);
             border: 1px solid var(--border-color);
@@ -104,13 +105,13 @@
             transition: all 0.3s ease;
         }
 
-        .login-input:focus {
+        .auth-input:focus {
             outline: none;
             border-color: var(--accent-blue);
             box-shadow: 0 0 15px var(--accent-glow);
         }
 
-        .login-btn {
+        .auth-btn {
             width: 100%;
             background: var(--accent-blue);
             color: var(--bg-primary);
@@ -124,11 +125,23 @@
             box-shadow: 0 0 20px var(--accent-glow);
         }
 
-        .login-btn:hover {
+        .auth-btn:hover {
             opacity: 0.9;
         }
 
-        .login-error {
+        .auth-toggle {
+            margin-top: 16px;
+            font-size: 12px;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        .auth-toggle span {
+            color: var(--accent-blue);
+            font-weight: 600;
+        }
+
+        .auth-error {
             color: var(--danger);
             font-size: 12px;
             margin-top: 12px;
@@ -369,7 +382,7 @@
             border: 1px solid var(--border-color);
             border-radius: 20px;
             width: 90%;
-            max-width: 500px;
+            max-width: 600px;
             padding: 32px;
             box-shadow: 0 25px 50px rgba(0,0,0,0.8);
             transform: translateY(20px);
@@ -457,6 +470,30 @@
             border-bottom: 1px solid rgba(255,255,255,0.03);
             padding-bottom: 4px;
         }
+
+        /* Admin User Table */
+        .admin-user-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-primary);
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .status-normal { background: rgba(52, 211, 153, 0.1); color: var(--success); }
+        .status-pending { background: rgba(251, 191, 36, 0.1); color: var(--warning); }
+        .status-suspended { background: rgba(248, 113, 113, 0.1); color: var(--danger); }
 
         .table-wrapper {
             background: var(--bg-secondary);
@@ -633,19 +670,47 @@
 </head>
 <body>
 
-    <div id="loginScreen">
-        <div class="login-card">
+    <!-- AUTH SCREEN (SIGN UP / LOGIN / ADMIN) -->
+    <div id="authScreen">
+        <div class="auth-card">
             <div class="logo-icon" style="margin: 0 auto 16px auto;">✈</div>
-            <h2>FIDS COMMAND ACCESS</h2>
-            <p>SECURE TERMINAL // AUTHORIZED PERSONNEL ONLY</p>
-            <form onsubmit="handleLogin(event)">
-                <input type="password" id="accessPass" class="login-input" placeholder="Enter security access password..." required>
-                <button type="submit" class="login-btn">Authenticate Stream</button>
-                <div class="login-error" id="loginError">Invalid access credentials.</div>
+            <h2 id="authTitle">FIDS COMMAND LOGIN</h2>
+            <p id="authSubtitle">SECURE TERMINAL // AUTHORIZED PERSONNEL</p>
+            
+            <form id="authForm" onsubmit="handleAuthSubmit(event)">
+                <div id="nameFieldContainer" style="display: none;">
+                    <input type="text" id="authName" class="auth-input" placeholder="Full Name...">
+                </div>
+                <input type="email" id="authEmail" class="auth-input" placeholder="Email Address..." required>
+                <input type="password" id="authPass" class="auth-input" placeholder="Password / Admin Key (vaggs54)..." required>
+                
+                <button type="submit" id="authSubmitBtn" class="auth-btn">Access Stream</button>
+                <div class="auth-error" id="authError"></div>
             </form>
+
+            <div class="auth-toggle" id="authToggleText" onclick="toggleAuthMode()">
+                Need an account? <span>Sign Up</span>
+            </div>
         </div>
     </div>
 
+    <!-- ADMIN CENTER MODAL -->
+    <div class="modal-overlay" id="adminModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Admin Center // User Management</h3>
+                <button class="close-modal" onclick="toggleModal('adminModal', false)">✕</button>
+            </div>
+            <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px; font-family: 'JetBrains Mono', monospace;">
+                Approve pending accounts or suspend unauthorized users.
+            </p>
+            <div id="adminUserList" style="max-height: 320px; overflow-y: auto;">
+                <!-- Populated via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP CONTAINER -->
     <div id="appContainer">
 
         <div id="global-tooltip">
@@ -692,7 +757,7 @@
                 <div class="logo-icon">✈</div>
                 <div class="brand-text">
                     <h1>CAIRNS AIRPORT FIDS</h1>
-                    <p>LOCAL COMMAND INTERFACE // SECURE STREAM</p>
+                    <p id="userWelcomeBanner">SECURE STREAM</p>
                 </div>
             </div>
             <div class="header-actions">
@@ -706,6 +771,7 @@
                         <span class="value" style="color: var(--success);">ONLINE</span>
                     </div>
                 </div>
+                <button class="icon-btn" id="adminNavBtn" onclick="openAdminCenter()" title="Admin Center" style="display: none; border-color: var(--warning); color: var(--warning);">👑</button>
                 <button class="icon-btn" onclick="toggleModal('logModal', true)" title="View System Log">📋</button>
                 <button class="icon-btn" onclick="toggleModal('settingsModal', true)" title="Open Settings">⚙</button>
             </div>
@@ -768,33 +834,136 @@
         let airlineDb = {};
         let currentFilter = 'all';
         let isFirstLoad = true;
+        let isSignUpMode = false;
 
         const tooltip = document.getElementById('global-tooltip');
         const tooltipTitle = document.getElementById('tooltip-title');
         const tooltipDesc = document.getElementById('tooltip-desc');
         const tooltipCode = document.getElementById('tooltip-code');
 
-        async function handleLogin(e) {
+        function toggleAuthMode() {
+            isSignUpMode = !isSignUpMode;
+            document.getElementById('authTitle').textContent = isSignUpMode ? "FIDS ACCOUNT REGISTRATION" : "FIDS COMMAND LOGIN";
+            document.getElementById('authSubtitle').textContent = isSignUpMode ? "CREATE NEW USER PROFILE" : "SECURE TERMINAL // AUTHORIZED PERSONNEL";
+            document.getElementById('nameFieldContainer').style.display = isSignUpMode ? "block" : "none";
+            document.getElementById('authSubmitBtn').textContent = isSignUpMode ? "Submit Registration" : "Access Stream";
+            document.getElementById('authToggleText').innerHTML = isSignUpMode ? "Already have an account? <span>Log In</span>" : "Need an account? <span>Sign Up</span>";
+            document.getElementById('authError').style.display = "none";
+        }
+
+        async function handleAuthSubmit(e) {
             e.preventDefault();
-            const pass = document.getElementById('accessPass').value;
-            
+            const email = document.getElementById('authEmail').value.trim();
+            const pass = document.getElementById('authPass').value.trim();
+            const name = document.getElementById('authName').value.trim();
+            const errDiv = document.getElementById('authError');
+            errDiv.style.display = 'none';
+
+            // Check if password is admin key
+            if (pass === "vaggs54") {
+                try {
+                    const res = await fetch('/api/admin/login', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({password: pass})
+                    });
+                    const data = await res.json();
+                    if (data.status === 'success') {
+                        document.getElementById('authScreen').style.display = 'none';
+                        document.getElementById('appContainer').style.display = 'block';
+                        document.getElementById('userWelcomeBanner').textContent = "ADMIN COMMAND CENTER // LEVEL 5 ACCESS";
+                        document.getElementById('adminNavBtn').style.display = 'flex';
+                        initApp();
+                        return;
+                    }
+                } catch(err) {}
+            }
+
+            if (isSignUpMode) {
+                try {
+                    const res = await fetch('/api/signup', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({email, name})
+                    });
+                    const data = await res.json();
+                    if (data.status === 'success') {
+                        alert(data.message);
+                        toggleAuthMode();
+                    } else {
+                        errDiv.textContent = data.message;
+                        errDiv.style.display = 'block';
+                    }
+                } catch(err) {
+                    errDiv.textContent = "Server connection error.";
+                    errDiv.style.display = 'block';
+                }
+            } else {
+                try {
+                    const res = await fetch('/api/login', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({email})
+                    });
+                    const data = await res.json();
+                    if (data.status === 'normal') {
+                        document.getElementById('authScreen').style.display = 'none';
+                        document.getElementById('appContainer').style.display = 'block';
+                        document.getElementById('userWelcomeBanner').textContent = `USER: ${data.name.toUpperCase()} // STREAM ACTIVE`;
+                        initApp();
+                    } else {
+                        errDiv.textContent = data.message;
+                        errDiv.style.display = 'block';
+                    }
+                } catch(err) {
+                    errDiv.textContent = "Server connection error.";
+                    errDiv.style.display = 'block';
+                }
+            }
+        }
+
+        async function openAdminCenter() {
             try {
-                const res = await fetch('/api/auth', {
+                const res = await fetch('/api/admin/users');
+                const users = await res.json();
+                const listContainer = document.getElementById('adminUserList');
+                listContainer.innerHTML = '';
+
+                for (const [email, info] of Object.entries(users)) {
+                    const row = document.createElement('div');
+                    row.className = 'admin-user-row';
+                    row.innerHTML = `
+                        <div>
+                            <strong>${info.name}</strong><br>
+                            <span style="font-size:11px; color:var(--text-muted); font-family:'JetBrains Mono', monospace;">${email}</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span class="status-badge status-${info.status}">${info.status}</span>
+                            <select onchange="updateUserStatus('${email}', this.value)" style="background:var(--bg-secondary); color:var(--text-main); border:1px solid var(--border-color); padding:4px 8px; border-radius:6px; font-size:11px;">
+                                <option value="pending" ${info.status==='pending'?'selected':''}>Pending</option>
+                                <option value="normal" ${info.status==='normal'?'selected':''}>Normal</option>
+                                <option value="suspended" ${info.status==='suspended'?'selected':''}>Suspended</option>
+                            </select>
+                        </div>
+                    `;
+                    listContainer.appendChild(row);
+                }
+                toggleModal('adminModal', true);
+            } catch(err) {
+                alert("Failed to load user list.");
+            }
+        }
+
+        async function updateUserStatus(email, newStatus) {
+            try {
+                await fetch('/api/admin/set-status', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({password: pass})
+                    body: JSON.stringify({email, status: newStatus})
                 });
-                const data = await res.json();
-                
-                if (data.status === 'success') {
-                    document.getElementById('loginScreen').style.display = 'none';
-                    document.getElementById('appContainer').style.display = 'block';
-                    initApp();
-                } else {
-                    document.getElementById('loginError').style.display = 'block';
-                }
-            } catch (err) {
-                document.getElementById('loginError').style.display = 'block';
+                openAdminCenter(); // Refresh list
+            } catch(err) {
+                alert("Failed to update status.");
             }
         }
 

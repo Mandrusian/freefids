@@ -6,9 +6,6 @@ from fastapi import FastAPI, HTTPException, Body
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse
 import requests
-import schedule
-import time
-from twilio.rest import Client
 
 app = FastAPI()
 
@@ -24,6 +21,11 @@ EMAIL = "xottovaggs@gmail.com"
 PASSWORD = "vaggs54"
 
 session = requests.Session()
+
+# Persistent user store: email -> {status: 'pending'|'normal'|'suspended', name: str}
+USER_STORE = {
+    "xottovaggs@gmail.com": {"name": "Xavi (Admin)", "status": "normal"}
+}
 
 
 def authenticate_session():
@@ -66,12 +68,86 @@ def serve_frontend():
     return "<h1>index.html not found in repository root!</h1>"
 
 
-@app.post("/api/auth")
-def authenticate_user(data: dict = Body(...)):
+@app.post("/api/signup")
+def register_user(data: dict = Body(...)):
+  email = data.get("email", "").strip().lower()
+  name = data.get("name", "").strip()
+  if not email or not name:
+    return {"status": "error", "message": "Email and Name are required."}
+
+  if email in USER_STORE:
+    return {
+        "status": "error",
+        "message": "Account already exists. Please log in.",
+    }
+
+  # Default new accounts to 'pending' awaiting admin review
+  USER_STORE[email] = {"name": name, "status": "pending"}
+  return {
+      "status": "success",
+      "message": (
+          "Account registered successfully! Awaiting administrator approval."
+      ),
+  }
+
+
+@app.post("/api/login")
+def login_user(data: dict = Body(...)):
+  email = data.get("email", "").strip().lower()
+  user = USER_STORE.get(email)
+
+  if not user:
+    return {
+        "status": "error",
+        "message": "Account not found. Please sign up first.",
+    }
+
+  if user["status"] == "pending":
+    return {
+        "status": "pending",
+        "message": (
+            "Your account is pending review by the administrator. Please"
+            " check back later."
+        ),
+    }
+
+  if user["status"] == "suspended":
+    return {
+        "status": "error",
+        "message": "Your account has been suspended by the administrator.",
+    }
+
+  return {
+      "status": "normal",
+      "name": user["name"],
+      "message": "Login successful.",
+  }
+
+
+@app.post("/api/admin/login")
+def admin_login(data: dict = Body(...)):
   password = data.get("password")
-  if password == "vaggs54" or password == "admin":
-    return {"status": "success", "message": "Authenticated successfully."}
-  return {"status": "error", "message": "Invalid access credentials."}
+  if password == "vaggs54":
+    return {"status": "success", "message": "Admin authenticated."}
+  return {"status": "error", "message": "Invalid admin password."}
+
+
+@app.get("/api/admin/users")
+def admin_get_users():
+  return USER_STORE
+
+
+@app.post("/api/admin/set-status")
+def admin_set_status(data: dict = Body(...)):
+  email = data.get("email", "").strip().lower()
+  status = data.get("status")  # 'normal', 'pending', 'suspended'
+  if email in USER_STORE and status in ["normal", "pending", "suspended"]:
+    USER_STORE[email]["status"] = status
+    return {
+        "status": "success",
+        "message": f"Updated {email} status to {status}.",
+    }
+  return {"status": "error", "message": "User not found or invalid status."}
 
 
 @app.get("/api/flights")
