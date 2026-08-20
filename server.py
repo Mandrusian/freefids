@@ -24,6 +24,7 @@ PASSWORD = "vaggs54"
 session = requests.Session()
 
 USER_FILE = "users.json"
+CHAT_FILE = "chats.json"
 
 def load_users():
     if os.path.exists(USER_FILE):
@@ -33,8 +34,8 @@ def load_users():
         except Exception:
             pass
     return {
-        "xottovaggs@gmail.com": {"name": "Xavi (Admin)", "status": "normal"},
-        "testuser@gmail.com": {"name": "Test Aviator", "status": "pending"}
+        "xottovaggs@gmail.com": {"name": "Xavi (Admin)", "chat_name": "Xavi", "status": "normal"},
+        "testuser@gmail.com": {"name": "Test Aviator", "chat_name": "TestPilot", "status": "pending"}
     }
 
 def save_users(users):
@@ -44,7 +45,24 @@ def save_users(users):
     except Exception as e:
         print(f"Error saving users: {e}")
 
+def load_chats():
+    if os.path.exists(CHAT_FILE):
+        try:
+            with open(CHAT_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return []
+
+def save_chats(chats):
+    try:
+        with open(CHAT_FILE, "w", encoding="utf-8") as f:
+            json.dump(chats, f, indent=4)
+    except Exception as e:
+        print(f"Error saving chats: {e}")
+
 USER_STORE = load_users()
+CHAT_STORE = load_chats()
 
 def authenticate_session():
     print("Authenticating with Cairns Airport FIDS...")
@@ -84,6 +102,7 @@ def serve_frontend():
 @app.post("/api/signup")
 def register_user(data: dict = Body(...)):
     global USER_STORE
+    USER_STORE = load_users()
     email = data.get("email", "").strip().lower()
     name = data.get("name", "").strip()
     if not email or not name:
@@ -92,7 +111,7 @@ def register_user(data: dict = Body(...)):
     if email in USER_STORE:
         return {"status": "error", "message": "Account already exists. Please log in."}
     
-    USER_STORE[email] = {"name": name, "status": "pending"}
+    USER_STORE[email] = {"name": name, "chat_name": name.split()[0], "status": "pending"}
     save_users(USER_STORE)
     return {"status": "success", "message": "Registration received. Please wait for admin approval."}
 
@@ -112,7 +131,19 @@ def login_user(data: dict = Body(...)):
     if user["status"] == "suspended":
         return {"status": "error", "message": "This account has been suspended."}
         
-    return {"status": "normal", "name": user["name"], "message": "Login successful."}
+    return {"status": "normal", "email": email, "name": user["name"], "chat_name": user.get("chat_name", user["name"]), "message": "Login successful."}
+
+@app.post("/api/update-chat-name")
+def update_chat_name(data: dict = Body(...)):
+    global USER_STORE
+    USER_STORE = load_users()
+    email = data.get("email", "").strip().lower()
+    new_chat_name = data.get("chat_name", "").strip()
+    if email in USER_STORE and new_chat_name:
+        USER_STORE[email]["chat_name"] = new_chat_name
+        save_users(USER_STORE)
+        return {"status": "success", "chat_name": new_chat_name}
+    return {"status": "error", "message": "Could not update display name."}
 
 @app.post("/api/admin/login")
 def admin_login(data: dict = Body(...)):
@@ -149,6 +180,31 @@ def admin_delete_user(data: dict = Body(...)):
         save_users(USER_STORE)
         return {"status": "success", "message": f"Deleted user {email}."}
     return {"status": "error", "message": "User not found."}
+
+@app.get("/api/chat/messages")
+def get_messages():
+    global CHAT_STORE
+    CHAT_STORE = load_chats()
+    return CHAT_STORE
+
+@app.post("/api/chat/messages")
+def post_message(data: dict = Body(...)):
+    global CHAT_STORE
+    CHAT_STORE = load_chats()
+    sender = data.get("sender", "Anonymous").strip()
+    text = data.get("text", "").strip()
+    if text:
+        msg = {
+            "sender": sender,
+            "text": text,
+            "time": datetime.now().strftime("%H:%M")
+        }
+        CHAT_STORE.append(msg)
+        if len(CHAT_STORE) > 100:
+            CHAT_STORE = CHAT_STORE[-100:]
+        save_chats(CHAT_STORE)
+        return {"status": "success", "message": msg}
+    return {"status": "error", "message": "Empty message."}
 
 @app.get("/api/flights")
 def get_flights():

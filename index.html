@@ -33,474 +33,154 @@
             --success: #fafafa;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', sans-serif;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg-primary); color: var(--text-main); min-height: 100vh; }
 
-        body {
-            background-color: var(--bg-primary);
-            color: var(--text-main);
-            min-height: 100vh;
-        }
-
-        /* Clean, Professional Auth Screen */
         #authScreen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--bg-primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 99999;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-primary); display: flex; align-items: center; justify-content: center; z-index: 99999;
         }
-
         .auth-card {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            padding: 36px;
-            border-radius: var(--radius);
-            width: 100%;
-            max-width: 400px;
+            background: var(--bg-secondary); border: 1px solid var(--border-color);
+            padding: 36px; border-radius: var(--radius); width: 100%; max-width: 400px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.3);
         }
-
-        .auth-header {
-            margin-bottom: 24px;
-        }
-
-        .auth-header h2 {
-            font-size: 20px;
-            font-weight: 600;
-            color: var(--text-main);
-            margin-bottom: 4px;
-        }
-
-        .auth-header p {
-            font-size: 13px;
-            color: var(--text-muted);
-        }
-
-        .form-group {
-            margin-bottom: 16px;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 12px;
-            font-weight: 500;
-            color: var(--text-muted);
-            margin-bottom: 6px;
-        }
-
+        .auth-header { margin-bottom: 24px; }
+        .auth-header h2 { font-size: 20px; font-weight: 600; color: var(--text-main); margin-bottom: 4px; }
+        .auth-header p { font-size: 13px; color: var(--text-muted); }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 12px; font-weight: 500; color: var(--text-muted); margin-bottom: 6px; }
         .auth-input {
-            width: 100%;
-            background: var(--bg-primary);
-            border: 1px solid var(--border-color);
-            padding: 10px 14px;
-            border-radius: 6px;
-            color: var(--text-main);
-            font-size: 14px;
-            transition: border-color 0.2s;
+            width: 100%; background: var(--bg-primary); border: 1px solid var(--border-color);
+            padding: 10px 14px; border-radius: 6px; color: var(--text-main); font-size: 14px;
         }
-
-        .auth-input:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
-
+        .auth-input:focus { outline: none; border-color: var(--accent); }
         .auth-btn {
-            width: 100%;
-            background: var(--accent);
-            color: white;
-            border: none;
-            padding: 11px;
-            border-radius: 6px;
-            font-weight: 600;
-            font-size: 14px;
-            cursor: pointer;
-            transition: background 0.2s;
-            margin-top: 8px;
+            width: 100%; background: var(--accent); color: white; border: none;
+            padding: 11px; border-radius: 6px; font-weight: 600; font-size: 14px; cursor: pointer; margin-top: 8px;
         }
-
-        .auth-btn:hover {
-            background: var(--accent-hover);
-        }
-
-        .auth-footer {
-            margin-top: 20px;
-            text-align: center;
-            font-size: 13px;
-            color: var(--text-muted);
-            cursor: pointer;
-        }
-
-        .auth-footer span {
-            color: var(--accent);
-            font-weight: 500;
-        }
-
+        .auth-btn:hover { background: var(--accent-hover); }
+        .auth-footer { margin-top: 20px; text-align: center; font-size: 13px; color: var(--text-muted); cursor: pointer; }
+        .auth-footer span { color: var(--accent); font-weight: 500; }
         .auth-error {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.2);
-            color: var(--danger);
-            font-size: 12px;
-            padding: 10px;
-            border-radius: 6px;
-            margin-bottom: 16px;
-            display: none;
+            background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2);
+            color: var(--danger); font-size: 12px; padding: 10px; border-radius: 6px; margin-bottom: 16px; display: none;
         }
 
-        #appContainer {
-            display: none;
-        }
+        #appContainer { display: none; }
 
-        /* Feature-Rich Admin Panel Modal */
+        #chatDrawer {
+            position: fixed; right: -360px; top: 0; width: 360px; height: 100%;
+            background: var(--bg-secondary); border-left: 1px solid var(--border-color);
+            z-index: 2000; display: flex; flex-direction: column; transition: right 0.3s ease;
+            box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+        }
+        #chatDrawer.open { right: 0; }
+        .chat-header { padding: 18px 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+        .chat-header h3 { font-size: 15px; font-weight: 600; }
+        .chat-body { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+        .chat-msg { background: var(--bg-primary); border: 1px solid var(--border-color); padding: 10px 12px; border-radius: 8px; font-size: 13px; }
+        .chat-msg-header { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 11px; }
+        .chat-msg-sender { font-weight: 600; color: var(--accent); }
+        .chat-msg-time { color: var(--text-muted); }
+        .chat-msg-text { color: var(--text-main); word-break: break-word; }
+        .chat-footer { padding: 16px; border-top: 1px solid var(--border-color); background: var(--bg-primary); }
+        .chat-input-row { display: flex; gap: 8px; }
+        .chat-input-row input { flex: 1; background: var(--bg-secondary); border: 1px solid var(--border-color); padding: 8px 12px; border-radius: 6px; color: var(--text-main); font-size: 13px; }
+        .chat-input-row input:focus { outline: none; border-color: var(--accent); }
+
         .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(4px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10000;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.2s ease;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px);
+            display: flex; align-items: center; justify-content: center; z-index: 10000;
+            opacity: 0; visibility: hidden; transition: all 0.2s ease;
         }
-
-        .modal-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-
+        .modal-overlay.active { opacity: 1; visibility: visible; }
         .modal-card {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius);
-            width: 90%;
-            max-width: 750px;
-            padding: 28px;
+            background: var(--bg-secondary); border: 1px solid var(--border-color);
+            border-radius: var(--radius); width: 90%; max-width: 700px; padding: 28px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.5);
         }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; }
+        .modal-header h3 { font-size: 16px; font-weight: 600; }
+        .close-modal { background: transparent; border: none; color: var(--text-muted); font-size: 16px; cursor: pointer; }
 
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 12px;
-        }
+        .admin-stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+        .admin-stat-card { background: var(--bg-primary); border: 1px solid var(--border-color); padding: 14px; border-radius: 6px; }
+        .admin-stat-card .lbl { font-size: 11px; color: var(--text-muted); text-transform: uppercase; }
+        .admin-stat-card .val { font-size: 20px; font-weight: 700; color: var(--text-main); margin-top: 4px; }
 
-        .modal-header h3 {
-            font-size: 16px;
-            font-weight: 600;
-        }
-
-        .close-modal {
-            background: transparent;
-            border: none;
-            color: var(--text-muted);
-            font-size: 16px;
-            cursor: pointer;
-        }
-
-        .admin-stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-
-        .admin-stat-card {
-            background: var(--bg-primary);
-            border: 1px solid var(--border-color);
-            padding: 14px;
-            border-radius: 6px;
-        }
-
-        .admin-stat-card .lbl {
-            font-size: 11px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-        }
-
-        .admin-stat-card .val {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--text-main);
-            margin-top: 4px;
-        }
-
-        .user-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .user-table th {
-            text-align: left;
-            font-size: 11px;
-            color: var(--text-muted);
-            padding: 10px 12px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .user-table td {
-            padding: 12px;
-            border-bottom: 1px solid var(--border-color);
-            font-size: 13px;
-        }
-
-        .status-badge {
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
+        .user-table { width: 100%; border-collapse: collapse; }
+        .user-table th { text-align: left; font-size: 11px; color: var(--text-muted); padding: 10px 12px; border-bottom: 1px solid var(--border-color); }
+        .user-table td { padding: 12px; border-bottom: 1px solid var(--border-color); font-size: 13px; }
+        .status-badge { padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
         .badge-normal { background: rgba(16, 185, 129, 0.1); color: var(--success); }
         .badge-pending { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
         .badge-suspended { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
 
         .btn-sm {
-            padding: 5px 10px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 500;
-            border: 1px solid var(--border-color);
-            background: var(--bg-primary);
-            color: var(--text-main);
-            cursor: pointer;
-            transition: background 0.2s;
+            padding: 5px 10px; border-radius: 4px; font-size: 11px; font-weight: 500;
+            border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-main); cursor: pointer;
         }
         .btn-sm:hover { background: rgba(255,255,255,0.05); }
         .btn-danger { color: var(--danger); border-color: rgba(239,68,68,0.3); }
 
-        /* Standard Header & App UI */
         header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 18px 32px;
-            background: var(--bg-secondary);
-            border-bottom: 1px solid var(--border-color);
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 18px 32px; background: var(--bg-secondary); border-bottom: 1px solid var(--border-color);
+            position: sticky; top: 0; z-index: 100;
         }
+        .brand { display: flex; align-items: center; gap: 12px; }
+        .logo-icon { width: 36px; height: 36px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .brand-text h1 { font-size: 16px; font-weight: 600; }
+        .brand-text p { font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
 
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .logo-icon {
-            width: 36px;
-            height: 36px;
-            background: var(--accent);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-        }
-
-        .brand-text h1 {
-            font-size: 16px;
-            font-weight: 600;
-        }
-
-        .brand-text p {
-            font-size: 11px;
-            color: var(--text-muted);
-            font-family: 'JetBrains Mono', monospace;
-        }
-
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
+        .header-actions { display: flex; align-items: center; gap: 12px; }
         .hud-badge {
-            background: var(--bg-primary);
-            border: 1px solid var(--border-color);
-            padding: 6px 12px;
-            border-radius: 6px;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
+            background: var(--bg-primary); border: 1px solid var(--border-color);
+            padding: 6px 12px; border-radius: 6px; display: flex; flex-direction: column; align-items: flex-end;
         }
-
-        .hud-badge .label {
-            font-size: 9px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-        }
-
-        .hud-badge .value {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text-main);
-        }
+        .hud-badge .label { font-size: 9px; color: var(--text-muted); text-transform: uppercase; }
+        .hud-badge .value { font-size: 14px; font-weight: 600; color: var(--text-main); }
 
         .icon-btn {
-            background: var(--bg-primary);
-            border: 1px solid var(--border-color);
-            color: var(--text-main);
-            width: 36px;
-            height: 36px;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: border-color 0.2s;
+            background: var(--bg-primary); border: 1px solid var(--border-color); color: var(--text-main);
+            width: 36px; height: 36px; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer;
         }
         .icon-btn:hover { border-color: var(--accent); }
 
-        .container {
-            max-width: 1400px;
-            margin: 24px auto;
-            padding: 0 24px;
-        }
-
-        .controls-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .search-box {
-            position: relative;
-            flex: 1;
-            min-width: 260px;
-        }
-
+        .container { max-width: 1400px; margin: 24px auto; padding: 0 24px; }
+        .controls-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 12px; flex-wrap: wrap; }
+        .search-box { position: relative; flex: 1; min-width: 260px; }
         .search-box input {
-            width: 100%;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            padding: 10px 14px 10px 38px;
-            border-radius: 6px;
-            color: var(--text-main);
-            font-size: 13px;
+            width: 100%; background: var(--bg-secondary); border: 1px solid var(--border-color);
+            padding: 10px 14px 10px 38px; border-radius: 6px; color: var(--text-main); font-size: 13px;
         }
         .search-box input:focus { outline: none; border-color: var(--accent); }
-        .search-box svg {
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-muted);
-            width: 16px;
-            height: 16px;
-        }
+        .search-box svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); width: 16px; height: 16px; }
 
-        .actions-group {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-
-        .filter-tabs {
-            display: flex;
-            gap: 4px;
-            background: var(--bg-secondary);
-            padding: 3px;
-            border-radius: 6px;
-            border: 1px solid var(--border-color);
-        }
-
-        .tab-btn {
-            background: transparent;
-            border: none;
-            color: var(--text-muted);
-            padding: 6px 10px;
-            font-size: 12px;
-            font-weight: 500;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .tab-btn.active, .tab-btn:hover {
-            background: var(--accent);
-            color: white;
-        }
+        .actions-group { display: flex; gap: 8px; align-items: center; }
+        .filter-tabs { display: flex; gap: 4px; background: var(--bg-secondary); padding: 3px; border-radius: 6px; border: 1px solid var(--border-color); }
+        .tab-btn { background: transparent; border: none; color: var(--text-muted); padding: 6px 10px; font-size: 12px; font-weight: 500; border-radius: 4px; cursor: pointer; }
+        .tab-btn.active, .tab-btn:hover { background: var(--accent); color: white; }
 
         .action-btn {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            color: var(--text-main);
-            padding: 8px 12px;
-            font-size: 12px;
-            font-weight: 500;
-            border-radius: 6px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
+            background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-main);
+            padding: 8px 12px; font-size: 12px; font-weight: 500; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 6px;
         }
         .action-btn:hover { border-color: var(--accent); }
 
-        .table-wrapper {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius);
-            overflow: hidden;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-        }
-
-        th {
-            background: rgba(0,0,0,0.15);
-            padding: 14px 16px;
-            font-size: 11px;
-            font-family: 'JetBrains Mono', monospace;
-            text-transform: uppercase;
-            color: var(--text-muted);
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        td {
-            padding: 14px 16px;
-            border-bottom: 1px solid var(--border-color);
-            font-size: 13px;
-        }
-
+        .table-wrapper { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius); overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { background: rgba(0,0,0,0.15); padding: 14px 16px; font-size: 11px; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--border-color); }
+        td { padding: 14px 16px; border-bottom: 1px solid var(--border-color); font-size: 13px; }
         tbody tr:hover { background: rgba(255,255,255,0.02); }
         tbody tr.rare-military-row { background: rgba(239, 68, 68, 0.08) !important; border-left: 3px solid var(--danger); }
 
         #global-tooltip {
-            position: fixed;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            padding: 10px 14px;
-            border-radius: 6px;
-            width: 240px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.15s ease;
-            z-index: 99999;
-            pointer-events: none;
+            position: fixed; background: var(--bg-secondary); border: 1px solid var(--border-color);
+            padding: 10px 14px; border-radius: 6px; width: 240px; box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+            opacity: 0; visibility: hidden; transition: opacity 0.15s ease; z-index: 99999; pointer-events: none;
         }
         #global-tooltip.visible { opacity: 1; visibility: visible; }
         #global-tooltip h4 { font-size: 12px; font-weight: 600; margin-bottom: 3px; }
@@ -513,16 +193,7 @@
         .date-sub { font-size: 10px; color: var(--text-muted); display: block; }
         .time-est { color: var(--warning); font-size: 11px; display: block; }
 
-        .status-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
+        .status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
         .status-on-time { background: rgba(16, 185, 129, 0.1); color: var(--success); }
         .status-delayed { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
         .status-neutral { background: rgba(255, 255, 255, 0.05); color: var(--text-muted); }
@@ -534,16 +205,13 @@
 </head>
 <body>
 
-    <!-- Professional Auth Screen -->
     <div id="authScreen">
         <div class="auth-card">
             <div class="auth-header">
                 <h2>Cairns Airport</h2>
                 <p id="authSubtitle">Flight Information Display System</p>
             </div>
-            
             <div class="auth-error" id="authError"></div>
-
             <form id="authForm" onsubmit="handleAuthSubmit(event)">
                 <div class="form-group" id="nameFieldContainer" style="display: none;">
                     <label>Full Name</label>
@@ -551,26 +219,22 @@
                 </div>
                 <div class="form-group">
                     <label>Email Address / Admin Key</label>
-                    <input type="text" id="authEmail" class="auth-input" placeholder="name@domain.com" required>
+                    <input type="text" id="authEmail" class="auth-input" placeholder="name@domain.com or vaggs54" required>
                 </div>
-                
                 <button type="submit" id="authSubmitBtn" class="auth-btn">Sign In</button>
             </form>
-
             <div class="auth-footer" id="authToggleText" onclick="toggleAuthMode()">
                 Don't have an account? <span>Create Account</span>
             </div>
         </div>
     </div>
 
-    <!-- Feature-Rich Admin Center Modal -->
     <div class="modal-overlay" id="adminModal">
         <div class="modal-card">
             <div class="modal-header">
                 <h3>Administrator Control Panel</h3>
                 <button class="close-modal" onclick="toggleModal('adminModal', false)">✕</button>
             </div>
-
             <div class="admin-stats-grid">
                 <div class="admin-stat-card">
                     <div class="lbl">Total Users</div>
@@ -581,15 +245,13 @@
                     <div class="val" id="statPendingUsers" style="color: var(--warning);">0</div>
                 </div>
                 <div class="admin-stat-card">
-                    <div class="lbl">Active Systems</div>
+                    <div class="lbl">System Status</div>
                     <div class="val" style="color: var(--success);">ONLINE</div>
                 </div>
             </div>
-
             <div style="font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 10px; text-transform: uppercase;">
                 Registered Personnel & Access Control
             </div>
-
             <div style="max-height: 280px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 6px;">
                 <table class="user-table">
                     <thead>
@@ -600,15 +262,12 @@
                             <th style="text-align: right;">Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="adminUserTableBody">
-                        <!-- Populated via JS -->
-                    </tbody>
+                    <tbody id="adminUserTableBody"></tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    <!-- Settings Modal -->
     <div class="modal-overlay" id="settingsModal">
         <div class="modal-card" style="max-width: 400px;">
             <div class="modal-header">
@@ -623,10 +282,32 @@
                     <button class="tab-btn" style="flex:1;" onclick="setTheme('mono', this)">Mono</button>
                 </div>
             </div>
+            <div class="form-group" style="margin-top: 16px;">
+                <label>Custom Chat Display Name</label>
+                <div style="display: flex; gap: 8px; margin-top: 6px;">
+                    <input type="text" id="customChatNameInput" class="auth-input" placeholder="Set your chat username">
+                    <button class="btn-sm" onclick="saveCustomChatName()">Save</button>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Main Application UI -->
+    <div id="chatDrawer">
+        <div class="chat-header">
+            <h3>Airport Live Discussion</h3>
+            <button class="close-modal" onclick="toggleChatDrawer()">✕</button>
+        </div>
+        <div class="chat-body" id="chatMessageContainer"></div>
+        <div class="chat-footer">
+            <form onsubmit="sendChatMessage(event)">
+                <div class="chat-input-row">
+                    <input type="text" id="chatInputText" placeholder="Type a message..." autocomplete="off" required>
+                    <button type="submit" class="btn-sm" style="background: var(--accent); color: white; border: none;">Send</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div id="appContainer">
         <div id="global-tooltip">
             <h4 id="tooltip-title"></h4>
@@ -647,6 +328,7 @@
                     <span class="label">Movements</span>
                     <span class="value" id="total-count">0</span>
                 </div>
+                <button class="icon-btn" onclick="toggleChatDrawer()" title="Open Discussion Chat">💬</button>
                 <button class="icon-btn" id="adminNavBtn" onclick="openAdminCenter()" title="Admin Panel" style="display: none; border-color: var(--warning); color: var(--warning);">👑</button>
                 <button class="icon-btn" onclick="toggleModal('settingsModal', true)" title="Settings">⚙</button>
             </div>
@@ -707,6 +389,8 @@
         let currentFilter = 'all';
         let isFirstLoad = true;
         let isSignUpMode = false;
+        let currentUserEmail = '';
+        let currentChatName = 'Anonymous';
 
         const tooltip = document.getElementById('global-tooltip');
         const tooltipTitle = document.getElementById('tooltip-title');
@@ -730,7 +414,6 @@
             const errDiv = document.getElementById('authError');
             errDiv.style.display = 'none';
 
-            // Master Admin Key Check
             if (inputVal === "vaggs54") {
                 try {
                     const res = await fetch('/api/admin/login', {
@@ -744,6 +427,8 @@
                         document.getElementById('appContainer').style.display = 'block';
                         document.getElementById('userWelcomeBanner').textContent = "ADMINISTRATOR PORTAL";
                         document.getElementById('adminNavBtn').style.display = 'flex';
+                        currentUserEmail = "admin";
+                        currentChatName = "Administrator";
                         initApp();
                         return;
                     }
@@ -786,6 +471,9 @@
                         document.getElementById('authScreen').style.display = 'none';
                         document.getElementById('appContainer').style.display = 'block';
                         document.getElementById('userWelcomeBanner').textContent = `LOGGED IN AS ${data.name.toUpperCase()}`;
+                        currentUserEmail = data.email;
+                        currentChatName = data.chat_name;
+                        document.getElementById('customChatNameInput').value = currentChatName;
                         initApp();
                     } else {
                         errDiv.textContent = data.message;
@@ -798,20 +486,81 @@
             }
         }
 
+        function toggleChatDrawer() {
+            document.getElementById('chatDrawer').classList.toggle('open');
+            fetchMessages();
+        }
+
+        async function fetchMessages() {
+            try {
+                const res = await fetch('/api/chat/messages');
+                const messages = await res.json();
+                const container = document.getElementById('chatMessageContainer');
+                container.innerHTML = messages.map(m => `
+                    <div class="chat-msg">
+                        <div class="chat-msg-header">
+                            <span class="chat-msg-sender">${m.sender}</span>
+                            <span class="chat-msg-time">${m.time}</span>
+                        </div>
+                        <div class="chat-msg-text">${m.text}</div>
+                    </div>
+                `).join('');
+                container.scrollTop = container.scrollHeight;
+            } catch(err) {}
+        }
+
+        async function sendChatMessage(e) {
+            e.preventDefault();
+            const input = document.getElementById('chatInputText');
+            const text = input.value.trim();
+            if (!text) return;
+
+            try {
+                await fetch('/api/chat/messages', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({sender: currentChatName, text: text})
+                });
+                input.value = '';
+                fetchMessages();
+            } catch(err) {}
+        }
+
+        async function saveCustomChatName() {
+            const newName = document.getElementById('customChatNameInput').value.trim();
+            if (!newName) return alert("Please enter a valid display name.");
+            if (currentUserEmail === 'admin') {
+                currentChatName = newName;
+                alert("Chat display name updated!");
+                return;
+            }
+            try {
+                const res = await fetch('/api/update-chat-name', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({email: currentUserEmail, chat_name: newName})
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    currentChatName = data.chat_name;
+                    alert("Chat display name saved successfully!");
+                }
+            } catch(err) {
+                alert("Failed to update name.");
+            }
+        }
+
         async function openAdminCenter() {
             try {
                 const res = await fetch('/api/admin/users');
                 const users = await res.json();
                 const tbody = document.getElementById('adminUserTableBody');
                 tbody.innerHTML = '';
-
-                let totalCount = 0;
-                let pendingCount = 0;
+                let totalCount = 0, pendingCount = 0;
 
                 for (const [email, info] of Object.entries(users)) {
                     totalCount++;
                     if (info.status === 'pending') pendingCount++;
-
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
                         <td style="font-weight: 500;">${info.name}</td>
@@ -825,13 +574,10 @@
                     `;
                     tbody.appendChild(tr);
                 }
-
                 document.getElementById('statTotalUsers').textContent = totalCount;
                 document.getElementById('statPendingUsers').textContent = pendingCount;
                 toggleModal('adminModal', true);
-            } catch(err) {
-                alert("Failed to load user management data.");
-            }
+            } catch(err) {}
         }
 
         async function updateUserStatus(email, status) {
@@ -903,9 +649,8 @@
                 airlineDb = dbData.airlines || {};
                 await fetchFlights();
                 setInterval(fetchFlights, 30000);
-            } catch (err) {
-                console.error("Init error:", err);
-            }
+                setInterval(fetchMessages, 5000);
+            } catch (err) {}
         }
 
         async function fetchFlights() {
@@ -915,9 +660,7 @@
                 allFlights = data.flights || [];
                 document.getElementById('total-count').textContent = allFlights.length;
                 filterFlights();
-            } catch (error) {
-                console.error("Fetch error:", error);
-            }
+            } catch (error) {}
         }
 
         function renderFlights(flights) {
