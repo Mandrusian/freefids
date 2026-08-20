@@ -325,6 +325,10 @@
             </div>
             <div class="header-actions">
                 <div class="hud-badge">
+                    <span class="label">Online FreeFIDS</span>
+                    <span class="value" id="online-count">1</span>
+                </div>
+                <div class="hud-badge">
                     <span class="label">Movements</span>
                     <span class="value" id="total-count">0</span>
                 </div>
@@ -484,6 +488,21 @@
                     errDiv.style.display = 'block';
                 }
             }
+        }
+
+        async function sendHeartbeat() {
+            if (!currentUserEmail) return;
+            try {
+                const res = await fetch('/api/heartbeat', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({email: currentUserEmail})
+                });
+                const data = await res.json();
+                if (data.online_count !== undefined) {
+                    document.getElementById('online-count').textContent = data.online_count;
+                }
+            } catch(err) {}
         }
 
         function toggleChatDrawer() {
@@ -648,8 +667,10 @@
                 aircraftDb = dbData.aircraft || {};
                 airlineDb = dbData.airlines || {};
                 await fetchFlights();
+                sendHeartbeat();
                 setInterval(fetchFlights, 30000);
                 setInterval(fetchMessages, 5000);
+                setInterval(sendHeartbeat, 10000);
             } catch (err) {}
         }
 

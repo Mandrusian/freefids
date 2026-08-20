@@ -26,6 +26,8 @@ session = requests.Session()
 USER_FILE = "users.json"
 CHAT_FILE = "chats.json"
 
+ACTIVE_USERS = set()
+
 def load_users():
     if os.path.exists(USER_FILE):
         try:
@@ -131,7 +133,15 @@ def login_user(data: dict = Body(...)):
     if user["status"] == "suspended":
         return {"status": "error", "message": "This account has been suspended."}
         
+    ACTIVE_USERS.add(email)
     return {"status": "normal", "email": email, "name": user["name"], "chat_name": user.get("chat_name", user["name"]), "message": "Login successful."}
+
+@app.post("/api/heartbeat")
+def heartbeat(data: dict = Body(...)):
+    email = data.get("email", "").strip().lower()
+    if email:
+        ACTIVE_USERS.add(email)
+    return {"online_count": max(1, len(ACTIVE_USERS))}
 
 @app.post("/api/update-chat-name")
 def update_chat_name(data: dict = Body(...)):
@@ -149,6 +159,7 @@ def update_chat_name(data: dict = Body(...)):
 def admin_login(data: dict = Body(...)):
     password = data.get("password")
     if password == "vaggs54":
+        ACTIVE_USERS.add("admin")
         return {"status": "success", "message": "Admin authenticated."}
     return {"status": "error", "message": "Incorrect administrator password."}
 
