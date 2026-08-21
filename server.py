@@ -18,7 +18,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-EMAIL = "xottovaggs@gmail.com"
+SUPREME_ADMIN_EMAIL = "xottovaggs@gmail.com"
 PASSWORD = "vaggs54"
 
 session = requests.Session()
@@ -29,19 +29,24 @@ CHAT_FILE = "chats.json"
 ACTIVE_USERS = set()
 
 def load_users():
+    base_users = {
+        SUPREME_ADMIN_EMAIL: {"name": "Xavi (Supreme Admin)", "chat_name": "Xavi", "status": "normal", "role": "supreme"},
+        "testuser@gmail.com": {"name": "Test Aviator", "chat_name": "TestPilot", "status": "pending", "role": "user"}
+    }
     if os.path.exists(USER_FILE):
         try:
             with open(USER_FILE, "r", encoding="utf-8") as f:
-                return json.load(f)
+                data = json.load(f)
+                # Ensure supreme admin always exists and has supreme role
+                data[SUPREME_ADMIN_EMAIL] = {"name": "Xavi (Supreme Admin)", "chat_name": "Xavi", "status": "normal", "role": "supreme"}
+                return data
         except Exception:
             pass
-    return {
-        "xottovaggs@gmail.com": {"name": "Xavi (Admin)", "chat_name": "Xavi", "status": "normal"},
-        "testuser@gmail.com": {"name": "Test Aviator", "chat_name": "TestPilot", "status": "pending"}
-    }
+    return base_users
 
 def save_users(users):
     try:
+        users[SUPREME_ADMIN_EMAIL] = {"name": "Xavi (Supreme Admin)", "chat_name": "Xavi", "status": "normal", "role": "supreme"}
         with open(USER_FILE, "w", encoding="utf-8") as f:
             json.dump(users, f, indent=4)
     except Exception as e:
@@ -54,7 +59,7 @@ def load_chats():
                 return json.load(f)
         except Exception:
             pass
-    return []
+    return [{"sender": "System", "text": "Welcome to the Cairns Airport live discussion stream.", "time": "08:00"}]
 
 def save_chats(chats):
     try:
@@ -79,7 +84,7 @@ def authenticate_session():
             "X-XSRF-TOKEN": xsrf_cookie,
             "Referer": "https://flights.cairnsairport.com.au/login"
         }
-        payload = {"_token": csrf_token, "email": EMAIL, "password": PASSWORD}
+        payload = {"_token": csrf_token, "email": SUPREME_ADMIN_EMAIL, "password": PASSWORD}
         login_response = session.post("https://flights.cairnsairport.com.au/login", data=payload, headers=headers)
         if login_response.status_code in [200, 302]:
             print("Authentication successful.")
@@ -113,7 +118,7 @@ def register_user(data: dict = Body(...)):
     if email in USER_STORE:
         return {"status": "error", "message": "Account already exists. Please log in."}
     
-    USER_STORE[email] = {"name": name, "chat_name": name.split()[0], "status": "pending"}
+    USER_STORE[email] = {"name": name, "chat_name": name.split()[0], "status": "pending", "role": "user"}
     save_users(USER_STORE)
     return {"status": "success", "message": "Registration received. Please wait for admin approval."}
 
@@ -134,7 +139,14 @@ def login_user(data: dict = Body(...)):
         return {"status": "error", "message": "This account has been suspended."}
         
     ACTIVE_USERS.add(email)
-    return {"status": "normal", "email": email, "name": user["name"], "chat_name": user.get("chat_name", user["name"]), "message": "Login successful."}
+    return {
+        "status": "normal", 
+        "email": email, 
+        "name": user["name"], 
+        "chat_name": user.get("chat_name", user["name"]), 
+        "role": user.get("role", "user"),
+        "message": "Login successful."
+    }
 
 @app.post("/api/heartbeat")
 def heartbeat(data: dict = Body(...)):
@@ -159,8 +171,8 @@ def update_chat_name(data: dict = Body(...)):
 def admin_login(data: dict = Body(...)):
     password = data.get("password")
     if password == "vaggs54":
-        ACTIVE_USERS.add("admin")
-        return {"status": "success", "message": "Admin authenticated."}
+        ACTIVE_USERS.add(SUPREME_ADMIN_EMAIL)
+        return {"status": "success", "email": SUPREME_ADMIN_EMAIL, "name": "Xavi (Supreme Admin)", "role": "supreme", "message": "Admin authenticated."}
     return {"status": "error", "message": "Incorrect administrator password."}
 
 @app.get("/api/admin/users")
@@ -175,17 +187,41 @@ def admin_set_status(data: dict = Body(...)):
     USER_STORE = load_users()
     email = data.get("email", "").strip().lower()
     status = data.get("status")
+    
+    if email == SUPREME_ADMIN_EMAIL:
+        return {"status": "error", "message": "Cannot modify Supreme Admin status."}
+        
     if email in USER_STORE and status in ["normal", "pending", "suspended"]:
         USER_STORE[email]["status"] = status
         save_users(USER_STORE)
         return {"status": "success", "message": f"Updated status for {email}."}
     return {"status": "error", "message": "User not found."}
 
+@app.post("/api/admin/set-role")
+def admin_set_role(data: dict = Body(...)):
+    global USER_STORE
+    USER_STORE = load_users()
+    email = data.get("email", "").strip().lower()
+    role = data.get("role") # 'user' or 'admin'
+    
+    if email == SUPREME_ADMIN_EMAIL:
+        return {"status": "error", "message": "Cannot modify Supreme Admin role."}
+        
+    if email in USER_STORE and role in ["user", "admin"]:
+        USER_STORE[email]["role"] = role
+        save_users(USER_STORE)
+        return {"status": "success", "message": f"Updated role for {email} to {role}."}
+    return {"status": "error", "message": "User not found or invalid role."}
+
 @app.post("/api/admin/delete-user")
 def admin_delete_user(data: dict = Body(...)):
     global USER_STORE
     USER_STORE = load_users()
     email = data.get("email", "").strip().lower()
+    
+    if email == SUPREME_ADMIN_EMAIL:
+        return {"status": "error", "message": "Cannot delete Supreme Admin."}
+        
     if email in USER_STORE:
         del USER_STORE[email]
         save_users(USER_STORE)

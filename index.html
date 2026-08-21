@@ -98,7 +98,7 @@
         .modal-overlay.active { opacity: 1; visibility: visible; }
         .modal-card {
             background: var(--bg-secondary); border: 1px solid var(--border-color);
-            border-radius: var(--radius); width: 90%; max-width: 700px; padding: 28px;
+            border-radius: var(--radius); width: 90%; max-width: 750px; padding: 28px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.5);
         }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; }
@@ -117,6 +117,8 @@
         .badge-normal { background: rgba(16, 185, 129, 0.1); color: var(--success); }
         .badge-pending { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
         .badge-suspended { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+        .badge-supreme { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+        .badge-admin { background: rgba(168, 85, 247, 0.15); color: #c084fc; }
 
         .btn-sm {
             padding: 5px 10px; border-radius: 4px; font-size: 11px; font-weight: 500;
@@ -258,7 +260,7 @@
                         <tr>
                             <th>User Name</th>
                             <th>Email Address</th>
-                            <th>Status</th>
+                            <th>Role & Status</th>
                             <th style="text-align: right;">Actions</th>
                         </tr>
                     </thead>
@@ -395,6 +397,8 @@
         let isSignUpMode = false;
         let currentUserEmail = '';
         let currentChatName = 'Anonymous';
+        let currentUserRole = 'user';
+        const SUPREME_ADMIN_EMAIL = "xottovaggs@gmail.com";
 
         const tooltip = document.getElementById('global-tooltip');
         const tooltipTitle = document.getElementById('tooltip-title');
@@ -429,10 +433,11 @@
                     if (data.status === 'success') {
                         document.getElementById('authScreen').style.display = 'none';
                         document.getElementById('appContainer').style.display = 'block';
-                        document.getElementById('userWelcomeBanner').textContent = "ADMINISTRATOR PORTAL";
+                        document.getElementById('userWelcomeBanner').textContent = "SUPREME ADMIN PORTAL";
                         document.getElementById('adminNavBtn').style.display = 'flex';
-                        currentUserEmail = "admin";
-                        currentChatName = "Administrator";
+                        currentUserEmail = data.email;
+                        currentChatName = data.name;
+                        currentUserRole = data.role;
                         initApp();
                         return;
                     }
@@ -477,7 +482,11 @@
                         document.getElementById('userWelcomeBanner').textContent = `LOGGED IN AS ${data.name.toUpperCase()}`;
                         currentUserEmail = data.email;
                         currentChatName = data.chat_name;
+                        currentUserRole = data.role;
                         document.getElementById('customChatNameInput').value = currentChatName;
+                        if (currentUserRole === 'admin' || currentUserRole === 'supreme') {
+                            document.getElementById('adminNavBtn').style.display = 'flex';
+                        }
                         initApp();
                     } else {
                         errDiv.textContent = data.message;
@@ -548,7 +557,7 @@
         async function saveCustomChatName() {
             const newName = document.getElementById('customChatNameInput').value.trim();
             if (!newName) return alert("Please enter a valid display name.");
-            if (currentUserEmail === 'admin') {
+            if (currentUserRole === 'supreme' && currentUserEmail === 'admin') {
                 currentChatName = newName;
                 alert("Chat display name updated!");
                 return;
@@ -580,16 +589,33 @@
                 for (const [email, info] of Object.entries(users)) {
                     totalCount++;
                     if (info.status === 'pending') pendingCount++;
+                    const isTargetSupreme = (email === SUPREME_ADMIN_EMAIL || info.role === 'supreme');
+                    const roleBadgeClass = info.role === 'supreme' ? 'badge-supreme' : (info.role === 'admin' ? 'badge-admin' : `badge-${info.status}`);
+                    
+                    let actionsHtml = '';
+                    if (!isTargetSupreme) {
+                        if (info.status !== 'normal') actionsHtml += `<button class="btn-sm" onclick="updateUserStatus('${email}', 'normal')">Approve</button>`;
+                        if (info.status !== 'suspended') actionsHtml += `<button class="btn-sm btn-danger" onclick="updateUserStatus('${email}', 'suspended')">Suspend</button>`;
+                        
+                        // Only Supreme Admin can promote/demote sub-admins
+                        if (currentUserRole === 'supreme') {
+                            if (info.role === 'admin') {
+                                actionsHtml += `<button class="btn-sm" onclick="setUserRole('${email}', 'user')">Demote</button>`;
+                            } else {
+                                actionsHtml += `<button class="btn-sm" onclick="setUserRole('${email}', 'admin')">Make Admin</button>`;
+                            }
+                        }
+                        actionsHtml += `<button class="btn-sm btn-danger" onclick="deleteUser('${email}')">Delete</button>`;
+                    } else {
+                        actionsHtml = `<span style="font-size: 11px; color: var(--text-muted);">Protected</span>`;
+                    }
+
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
-                        <td style="font-weight: 500;">${info.name}</td>
+                        <td style="font-weight: 500;">${info.name} ${isTargetSupreme ? '👑' : ''}</td>
                         <td style="color: var(--text-muted); font-family: 'JetBrains Mono', monospace; font-size: 12px;">${email}</td>
-                        <td><span class="status-badge badge-${info.status}">${info.status}</span></td>
-                        <td style="text-align: right; display: flex; gap: 6px; justify-content: flex-end;">
-                            ${info.status !== 'normal' ? `<button class="btn-sm" onclick="updateUserStatus('${email}', 'normal')">Approve</button>` : ''}
-                            ${info.status !== 'suspended' ? `<button class="btn-sm btn-danger" onclick="updateUserStatus('${email}', 'suspended')">Suspend</button>` : ''}
-                            <button class="btn-sm btn-danger" onclick="deleteUser('${email}')">Delete</button>
-                        </td>
+                        <td><span class="status-badge ${roleBadgeClass}">${info.role || info.status}</span></td>
+                        <td style="text-align: right; display: flex; gap: 6px; justify-content: flex-end;">${actionsHtml}</td>
                     `;
                     tbody.appendChild(tr);
                 }
@@ -604,6 +630,15 @@
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({email, status})
+            });
+            openAdminCenter();
+        }
+
+        async function setUserRole(email, role) {
+            await fetch('/api/admin/set-role', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({email, role})
             });
             openAdminCenter();
         }
