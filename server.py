@@ -34,12 +34,12 @@ ACTIVE_USERS = {}
 def load_users():
     default_users = {
         SUPREME_ADMIN_EMAIL: {
-            "name": "Xavi (Supreme Admin)", 
+            "name": "Xavi (Supreme Admin) 👑", 
             "chat_name": "Xavi", 
             "status": "normal", 
             "role": "supreme", 
             "rank_name": "Supreme",
-            "avatar": "▲",
+            "avatar": "✈️",
             "bio": "System Overseer & Administrator.",
             "muted": False,
             "created_at": "2026-01-01"
@@ -50,7 +50,7 @@ def load_users():
             "status": "normal", 
             "role": "admin", 
             "rank_name": "Admin",
-            "avatar": "◈",
+            "avatar": "🛡️",
             "bio": "Operations & Traffic Control.",
             "muted": False,
             "created_at": "2026-01-10"
@@ -61,7 +61,7 @@ def load_users():
             "status": "normal", 
             "role": "user", 
             "rank_name": "Peasant",
-            "avatar": "■",
+            "avatar": "🔹",
             "bio": "Spotter & FIDS Observer.",
             "muted": False,
             "created_at": "2026-02-01"
@@ -78,12 +78,12 @@ def load_users():
         if email not in data:
             data[email] = info
     data[SUPREME_ADMIN_EMAIL] = {
-        "name": "Xavi (Supreme Admin)", 
+        "name": "Xavi (Supreme Admin) 👑", 
         "chat_name": "Xavi", 
         "status": "normal", 
         "role": "supreme", 
         "rank_name": "Supreme",
-        "avatar": "▲",
+        "avatar": "✈️",
         "bio": data.get(SUPREME_ADMIN_EMAIL, {}).get("bio", "System Overseer & Administrator."),
         "muted": False,
         "created_at": "2026-01-01"
@@ -223,10 +223,23 @@ def admin_add_notice(data: dict = Body(...)):
         return {"status": "error", "message": "Unauthorized."}
         
     NOTICE_STORE = load_notices()
+    notice_id = data.get("id")
+    
+    if notice_id:
+        for n in NOTICE_STORE:
+            if n.get("id") == notice_id:
+                n["target"] = data.get("target", "all")
+                n["behavior"] = data.get("behavior", "dismissible")
+                n["title"] = data.get("title", "").strip()
+                n["msg"] = data.get("msg", "").strip()
+                n["color"] = data.get("color", "#0284c7")
+                save_notices(NOTICE_STORE)
+                return {"status": "success", "notices": NOTICE_STORE}
+
     new_notice = {
         "id": int(datetime.now().timestamp() * 1000),
-        "target": data.get("target", "all"), # 'all', 'logged_in', 'logged_out'
-        "behavior": data.get("behavior", "dismissible"), # 'sticky', 'dismissible', 'hidden'
+        "target": data.get("target", "all"),
+        "behavior": data.get("behavior", "dismissible"),
         "title": data.get("title", "").strip(),
         "msg": data.get("msg", "").strip(),
         "color": data.get("color", "#0284c7")
@@ -268,7 +281,7 @@ def register_user(data: dict = Body(...)):
         "status": "pending", 
         "role": "user", 
         "rank_name": "Peasant",
-        "avatar": "■",
+        "avatar": "🔹",
         "bio": "Registered personnel.",
         "muted": False,
         "created_at": datetime.now().strftime("%Y-%m-%d")
@@ -304,7 +317,7 @@ def login_user(data: dict = Body(...)):
         "chat_name": user.get("chat_name", user["name"]), 
         "role": user.get("role", "user"),
         "rank_name": user.get("rank_name", "Peasant"),
-        "avatar": user.get("avatar", "■"),
+        "avatar": user.get("avatar", "🔹"),
         "bio": user.get("bio", ""),
         "muted": user.get("muted", False),
         "message": "Login successful."
@@ -365,7 +378,7 @@ def get_user_profile(data: dict = Body(...)):
         "chat_name": info.get("chat_name"),
         "role": info.get("role"),
         "rank_name": info.get("rank_name"),
-        "avatar": info.get("avatar", "■"),
+        "avatar": info.get("avatar", "🔹"),
         "bio": info.get("bio", "No profile bio recorded."),
         "muted": info.get("muted", False),
         "created_at": info.get("created_at", "2026-01-01"),
@@ -402,7 +415,7 @@ def admin_login(data: dict = Body(...)):
     password = data.get("password")
     if password == "vaggs54":
         ACTIVE_USERS[SUPREME_ADMIN_EMAIL] = datetime.now().timestamp()
-        return {"status": "success", "email": SUPREME_ADMIN_EMAIL, "name": "Xavi (Supreme Admin)", "role": "supreme", "rank_name": "Supreme", "message": "Admin authenticated."}
+        return {"status": "success", "email": SUPREME_ADMIN_EMAIL, "name": "Xavi (Supreme Admin) 👑", "role": "supreme", "rank_name": "Supreme", "message": "Admin authenticated."}
     return {"status": "error", "message": "Incorrect administrator password."}
 
 @app.get("/api/admin/users")
@@ -581,7 +594,7 @@ def post_message(data: dict = Body(...)):
     else:
         color = "#34d399"
         
-    avatar = user_info.get("avatar", "■")
+    avatar = user_info.get("avatar", "🔹")
     sender_display = f"{avatar} {user_info.get('chat_name', 'User')} [{user_info.get('rank_name', 'user')}]"
             
     if text:
@@ -606,21 +619,21 @@ def react_message(data: dict = Body(...)):
     global CHAT_STORE
     CHAT_STORE = load_chats()
     msg_id = data.get("id")
-    glyph = data.get("glyph")
+    emoji = data.get("emoji")
     user = data.get("user")
     
     for m in CHAT_STORE:
         if m.get("id") == msg_id:
             if "reactions" not in m:
                 m["reactions"] = {}
-            if glyph not in m["reactions"]:
-                m["reactions"][glyph] = []
-            if user in m["reactions"][glyph]:
-                m["reactions"][glyph].remove(user)
-                if not m["reactions"][glyph]:
-                    del m["reactions"][glyph]
+            if emoji not in m["reactions"]:
+                m["reactions"][emoji] = []
+            if user in m["reactions"][emoji]:
+                m["reactions"][emoji].remove(user)
+                if not m["reactions"][emoji]:
+                    del m["reactions"][emoji]
             else:
-                m["reactions"][glyph].append(user)
+                m["reactions"][emoji].append(user)
             save_chats(CHAT_STORE)
             return {"status": "success", "reactions": m["reactions"]}
     return {"status": "error", "message": "Message not found."}

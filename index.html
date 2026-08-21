@@ -90,7 +90,7 @@
             position: sticky; top: 0; z-index: 99999; box-shadow: 0 4px 16px rgba(0,0,0,0.5);
         }
         .notice-bar {
-            width: 100%; padding: 10px 24px; font-size: 12px; font-weight: 600;
+            width: 100%; padding: 10px 24px; font-size: 13px; font-weight: 600;
             display: flex; justify-content: space-between; align-items: center; gap: 16px;
             backdrop-filter: blur(8px);
         }
@@ -108,7 +108,7 @@
         }
         .docked-notice-pill {
             background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main);
-            padding: 8px 14px; border-radius: 20px; font-size: 11px; font-weight: 700;
+            padding: 8px 14px; border-radius: 20px; font-size: 12px; font-weight: 700;
             display: flex; align-items: center; gap: 8px; cursor: pointer; box-shadow: var(--shadow); transition: var(--fx-transition);
         }
         .docked-notice-pill:hover { border-color: var(--accent); transform: translateY(-2px); }
@@ -169,8 +169,8 @@
         .reaction-pill { background: var(--bg-primary); border: 1px solid var(--border-color); padding: 2px 8px; border-radius: 12px; font-size: 11px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: var(--fx-transition); }
         .reaction-pill:hover { border-color: var(--accent); }
         .chat-tools { display: flex; gap: 6px; margin-top: 6px; align-items: center; }
-        .glyph-btn { background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 12px; font-family: 'JetBrains Mono', monospace; padding: 2px 4px; transition: var(--fx-transition); }
-        .glyph-btn:hover { color: var(--accent); }
+        .emoji-picker-btn { background: transparent; border: none; cursor: pointer; font-size: 13px; opacity: 0.7; transition: var(--fx-transition); }
+        .emoji-picker-btn:hover { opacity: 1; }
 
         .chat-footer { padding: 16px; border-top: 1px solid var(--border-color); background: var(--bg-card); display: flex; flex-direction: column; gap: 10px; }
         .chat-input-row { display: flex; gap: 8px; }
@@ -225,7 +225,7 @@
             position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         }
         .brand { display: flex; align-items: center; gap: 12px; }
-        .logo-icon { width: 36px; height: 36px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800; font-family: 'JetBrains Mono', monospace; box-shadow: 0 4px 16px var(--accent-glow); }
+        .logo-icon { width: 38px; height: 38px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; box-shadow: 0 4px 16px var(--accent-glow); }
         .brand-text h1 { font-size: 16px; font-weight: 800; letter-spacing: -0.3px; }
         .brand-text p { font-size: 10px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; margin-top: 1px; }
 
@@ -241,7 +241,7 @@
         .icon-btn {
             background: var(--bg-primary); border: 1px solid var(--border-color); color: var(--text-main);
             width: 38px; height: 38px; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: var(--fx-transition);
-            font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700;
+            font-size: 16px;
         }
         .icon-btn:hover { border-color: var(--accent); background: var(--accent-glow); }
 
@@ -253,7 +253,7 @@
             padding: 10px 14px 10px 38px; border-radius: 6px; color: var(--text-main); font-size: 13px; transition: var(--fx-transition);
         }
         .search-box input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
-        .search-box .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 12px; font-family: 'JetBrains Mono', monospace; }
+        .search-box svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); width: 14px; height: 14px; }
 
         .actions-group { display: flex; gap: 8px; align-items: center; }
         .filter-tabs { display: flex; gap: 2px; background: var(--bg-secondary); padding: 3px; border-radius: 6px; border: 1px solid var(--border-color); }
@@ -298,7 +298,7 @@
         .admin-notice-item { background: var(--bg-primary); border: 1px solid var(--border-color); padding: 12px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 8px; }
 
         .profile-card-body { text-align: center; padding: 10px 0; }
-        .profile-avatar-large { font-size: 32px; font-family: 'JetBrains Mono', monospace; width: 64px; height: 64px; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto; color: var(--accent); }
+        .profile-avatar-large { font-size: 32px; width: 64px; height: 64px; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto; color: var(--accent); }
 
         .switch { position: relative; display: inline-block; width: 38px; height: 20px; }
         .switch input { opacity: 0; width: 0; height: 0; }
@@ -352,7 +352,7 @@
                 <button class="close-modal" onclick="toggleModal('userProfileModal', false)">✕</button>
             </div>
             <div class="profile-card-body">
-                <div class="profile-avatar-large" id="profAvatar">■</div>
+                <div class="profile-avatar-large" id="profAvatar">🔹</div>
                 <h4 id="profName" style="font-size: 16px; font-weight: 800;">---</h4>
                 <p id="profRank" style="font-size: 11px; color: var(--accent); font-family: 'JetBrains Mono', monospace; font-weight: 700; margin-top: 2px;">PEASANT</p>
                 <p id="profEmail" style="font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; margin-top: 2px;">---</p>
@@ -361,11 +361,11 @@
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 11px; text-align: left;">
                     <div style="background: var(--bg-primary); padding: 8px; border-radius: 6px; border: 1px solid var(--border-color);">
-                        <span style="color: var(--text-muted); display: block; font-size: 9px; uppercase;">Cleared Since</span>
+                        <span style="color: var(--text-muted); display: block; font-size: 9px; text-transform: uppercase;">Cleared Since</span>
                         <strong id="profCreated" style="font-family: 'JetBrains Mono', monospace;">2026-01-01</strong>
                     </div>
                     <div style="background: var(--bg-primary); padding: 8px; border-radius: 6px; border: 1px solid var(--border-color);">
-                        <span style="color: var(--text-muted); display: block; font-size: 9px; uppercase;">Chat Messages</span>
+                        <span style="color: var(--text-muted); display: block; font-size: 9px; text-transform: uppercase;">Chat Messages</span>
                         <strong id="profMsgs" style="font-family: 'JetBrains Mono', monospace;">0</strong>
                     </div>
                 </div>
@@ -377,7 +377,7 @@
     <div class="modal-overlay" id="adminModal">
         <div class="modal-card">
             <div class="modal-header">
-                <h3>Administrator Control Panel</h3>
+                <h3>Administrator Control Panel 👑</h3>
                 <button class="close-modal" onclick="toggleModal('adminModal', false)">✕</button>
             </div>
             <div class="admin-stats-grid">
@@ -429,11 +429,12 @@
 
             <!-- Stacked Notices Manager -->
             <div style="background: var(--bg-primary); border: 1px solid var(--border-color); padding: 16px; border-radius: 8px; margin-bottom: 20px;">
-                <h4 style="font-size: 12px; font-weight: 800; margin-bottom: 12px; color: var(--accent); text-transform: uppercase;">Notice Stack Manager</h4>
+                <h4 style="font-size: 12px; font-weight: 800; margin-bottom: 12px; color: var(--accent); text-transform: uppercase;">📢 Notice Stack Manager</h4>
                 
                 <div id="adminNoticesList" style="margin-bottom: 12px;"></div>
 
                 <div style="border-top: 1px dashed var(--border-color); padding-top: 12px;">
+                    <input type="hidden" id="noticeEditId">
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
                         <div class="form-group" style="margin: 0;">
                             <label>Audience Target</label>
@@ -472,7 +473,10 @@
                             </select>
                         </div>
                     </div>
-                    <button class="auth-btn" style="margin: 0; padding: 10px;" onclick="addStackedNotice()">Publish Notice</button>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="auth-btn" id="saveNoticeBtn" style="margin: 0; padding: 10px; flex: 1;" onclick="addStackedNotice()">Publish Notice</button>
+                        <button class="btn-sm" id="cancelNoticeEditBtn" style="display: none;" onclick="resetNoticeForm()">Cancel Edit</button>
+                    </div>
                 </div>
             </div>
 
@@ -524,7 +528,7 @@
     <div class="modal-overlay" id="settingsModal">
         <div class="modal-card" style="max-width: 440px;">
             <div class="modal-header">
-                <h3>Interface Preferences</h3>
+                <h3>Interface Preferences ⚙️</h3>
                 <button class="close-modal" onclick="toggleModal('settingsModal', false)">✕</button>
             </div>
             <div class="form-group">
@@ -553,8 +557,8 @@
                 <input type="text" id="customChatNameInput" class="auth-input" placeholder="Display name">
             </div>
             <div class="form-group" style="margin-top: 12px;">
-                <label>Avatar Symbol (Unicode Glyph)</label>
-                <input type="text" id="customAvatarInput" class="auth-input" placeholder="e.g. ■, ▲, ◈">
+                <label>Avatar Symbol or Emoji</label>
+                <input type="text" id="customAvatarInput" class="auth-input" placeholder="e.g. ✈️, 🔹, 🛡️">
             </div>
             <div class="form-group" style="margin-top: 12px;">
                 <label>Profile Bio</label>
@@ -566,7 +570,7 @@
 
     <div id="chatDrawer">
         <div class="chat-header">
-            <h3>Airport Discussion Stream</h3>
+            <h3>Airport Discussion Stream 💬</h3>
             <div style="display: flex; gap: 8px; align-items: center;">
                 <button class="btn-sm" id="clearChatBtn" onclick="clearChatMessages()" style="display: none; background: rgba(239,68,68,0.15); color: var(--danger);">Clear Chat</button>
                 <button class="close-modal" onclick="toggleChatDrawer()">✕</button>
@@ -598,7 +602,7 @@
 
         <header>
             <div class="brand">
-                <div class="logo-icon">CNS</div>
+                <div class="logo-icon">✈️</div>
                 <div class="brand-text">
                     <h1>Cairns Airport FIDS</h1>
                     <p id="userWelcomeBanner">LIVE TELEMETRY</p>
@@ -613,16 +617,16 @@
                     <span class="label">Movements</span>
                     <span class="value" id="total-count">0</span>
                 </div>
-                <button class="icon-btn" onclick="toggleChatDrawer()" title="Discussion Feed">CHAT</button>
-                <button class="icon-btn" id="adminNavBtn" onclick="openAdminCenter()" title="Admin Panel" style="display: none; border-color: var(--warning); color: var(--warning);">ADMIN</button>
-                <button class="icon-btn" onclick="toggleModal('settingsModal', true)" title="Settings">PREFS</button>
+                <button class="icon-btn" onclick="toggleChatDrawer()" title="Discussion Feed">💬</button>
+                <button class="icon-btn" id="adminNavBtn" onclick="openAdminCenter()" title="Admin Panel" style="display: none; border-color: var(--warning); color: var(--warning);">👑</button>
+                <button class="icon-btn" onclick="toggleModal('settingsModal', true)" title="Settings">⚙️</button>
             </div>
         </header>
 
         <div class="container">
             <div class="controls-bar">
                 <div class="search-box">
-                    <span class="search-icon">FILTER</span>
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                     <input type="text" id="searchInput" placeholder="Search flight, airline, destination, registration..." onkeyup="filterFlights()">
                 </div>
                 <div class="actions-group">
@@ -677,7 +681,7 @@
         let currentChatName = 'Anonymous';
         let currentUserRole = 'user';
         let currentRankName = 'user';
-        let currentAvatar = '■';
+        let currentAvatar = '🔹';
         let activeUsersCache = [];
         let allNoticesList = [];
         const SUPREME_ADMIN_EMAIL = "xottovaggs@gmail.com";
@@ -743,11 +747,13 @@
                 if (notice.target === 'logged_in' && !isLoggedIn) return;
                 if (notice.target === 'logged_out' && isLoggedIn) return;
 
-                if (hiddenIds.includes(notice.id) || notice.behavior === 'hidden') {
+                const isHidden = hiddenIds.includes(notice.id) || notice.behavior === 'hidden';
+
+                if (isHidden) {
                     if (!dismissedIds.includes(notice.id)) {
                         const pill = document.createElement('div');
                         pill.className = 'docked-notice-pill';
-                        pill.innerHTML = `<span>🛈 Notice: ${notice.title || 'Advisory'}</span>`;
+                        pill.innerHTML = `<span>📢 ${notice.title ? `[${notice.title}]` : 'Notice'} (Click to Restore)</span>`;
                         pill.onclick = () => restoreNotice(notice.id);
                         dock.appendChild(pill);
                     }
@@ -765,7 +771,9 @@
                 if (notice.behavior === 'dismissible') {
                     actionBtns += `<button class="notice-action-btn" onclick="dismissSingleNotice(${notice.id})">Dismiss</button>`;
                 }
-                actionBtns += `<button class="notice-action-btn" onclick="hideSingleNotice(${notice.id})">Minimize</button>`;
+                if (notice.behavior !== 'sticky') {
+                    actionBtns += `<button class="notice-action-btn" onclick="hideSingleNotice(${notice.id})">Minimize</button>`;
+                }
 
                 bar.innerHTML = `
                     <div class="notice-content">
@@ -820,12 +828,37 @@
                             Target: ${n.target} | Behavior: ${n.behavior}
                         </div>
                     </div>
-                    <button class="btn-sm btn-danger" onclick="deleteStackedNotice(${n.id})">Delete</button>
+                    <div style="display: flex; gap: 4px;">
+                        <button class="btn-sm" onclick="editNoticeForm(${n.id})">Edit</button>
+                        <button class="btn-sm btn-danger" onclick="deleteStackedNotice(${n.id})">Delete</button>
+                    </div>
                 </div>
             `).join('');
         }
 
+        function editNoticeForm(id) {
+            const notice = allNoticesList.find(n => n.id === id);
+            if (!notice) return;
+            document.getElementById('noticeEditId').value = notice.id;
+            document.getElementById('noticeTargetSelect').value = notice.target || 'all';
+            document.getElementById('noticeTitleInput').value = notice.title || '';
+            document.getElementById('noticeMsgInput').value = notice.msg || '';
+            document.getElementById('noticeBehaviorSelect').value = notice.behavior || 'dismissible';
+            document.getElementById('noticeColorSelect').value = notice.color || '#0284c7';
+            document.getElementById('saveNoticeBtn').textContent = 'Update Notice';
+            document.getElementById('cancelNoticeEditBtn').style.display = 'inline-block';
+        }
+
+        function resetNoticeForm() {
+            document.getElementById('noticeEditId').value = '';
+            document.getElementById('noticeTitleInput').value = '';
+            document.getElementById('noticeMsgInput').value = '';
+            document.getElementById('saveNoticeBtn').textContent = 'Publish Notice';
+            document.getElementById('cancelNoticeEditBtn').style.display = 'none';
+        }
+
         async function addStackedNotice() {
+            const notice_id = document.getElementById('noticeEditId').value;
             const target = document.getElementById('noticeTargetSelect').value;
             const title = document.getElementById('noticeTitleInput').value.trim();
             const msg = document.getElementById('noticeMsgInput').value.trim();
@@ -838,13 +871,12 @@
                 const res = await fetch('/api/admin/notices/add', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({email: currentUserEmail, target, title, msg, behavior, color})
+                    body: JSON.stringify({email: currentUserEmail, id: notice_id ? parseInt(notice_id) : null, target, title, msg, behavior, color})
                 });
                 const data = await res.json();
                 if (data.status === 'success') {
                     allNoticesList = data.notices;
-                    document.getElementById('noticeTitleInput').value = '';
-                    document.getElementById('noticeMsgInput').value = '';
+                    resetNoticeForm();
                     renderStackedNotices();
                     renderAdminNoticesList();
                 } else {
@@ -979,7 +1011,7 @@
                         currentChatName = data.chat_name;
                         currentUserRole = data.role;
                         currentRankName = data.rank_name;
-                        currentAvatar = data.avatar || '■';
+                        currentAvatar = data.avatar || '🔹';
                         document.getElementById('customChatNameInput').value = currentChatName;
                         document.getElementById('customAvatarInput').value = currentAvatar;
                         document.getElementById('customBioInput').value = data.bio || '';
@@ -1062,9 +1094,9 @@
                 container.innerHTML = messages.map(m => {
                     let reactionsHtml = '';
                     if (m.reactions) {
-                        for (const [glyph, users] of Object.entries(m.reactions)) {
+                        for (const [emoji, users] of Object.entries(m.reactions)) {
                             const hasReacted = users.includes(currentChatName);
-                            reactionsHtml += `<span class="reaction-pill" style="${hasReacted ? 'border-color: var(--accent); background: var(--accent-glow);' : ''}" onclick="toggleReaction(${m.id}, '${glyph}')">${glyph} ${users.length}</span>`;
+                            reactionsHtml += `<span class="reaction-pill" style="${hasReacted ? 'border-color: var(--accent); background: var(--accent-glow);' : ''}" onclick="toggleReaction(${m.id}, '${emoji}')">${emoji} ${users.length}</span>`;
                         }
                     }
                     return `
@@ -1075,10 +1107,10 @@
                             </div>
                             <div class="chat-msg-text">${m.text}</div>
                             <div class="chat-tools">
-                                <button class="glyph-btn" onclick="toggleReaction(${m.id}, '▲')">▲</button>
-                                <button class="glyph-btn" onclick="toggleReaction(${m.id}, '■')">■</button>
-                                <button class="glyph-btn" onclick="toggleReaction(${m.id}, '◈')">◈</button>
-                                <button class="glyph-btn" onclick="toggleReaction(${m.id}, '⚡')">⚡</button>
+                                <button class="emoji-picker-btn" onclick="toggleReaction(${m.id}, '👍')">👍</button>
+                                <button class="emoji-picker-btn" onclick="toggleReaction(${m.id}, '❤️')">❤️</button>
+                                <button class="emoji-picker-btn" onclick="toggleReaction(${m.id}, '✈️')">✈️</button>
+                                <button class="emoji-picker-btn" onclick="toggleReaction(${m.id}, '🔥')">🔥</button>
                             </div>
                             <div class="chat-reactions-row">${reactionsHtml}</div>
                         </div>
@@ -1097,11 +1129,11 @@
                 });
                 const data = await res.json();
                 if (data.status === 'success') {
-                    document.getElementById('profAvatar').textContent = data.avatar || '■';
+                    document.getElementById('profAvatar').textContent = data.avatar || '🔹';
                     document.getElementById('profName').textContent = data.name;
                     document.getElementById('profRank').textContent = (data.rank_name || data.role).toUpperCase();
                     document.getElementById('profEmail').textContent = data.email;
-                    document.getElementById('profBio').textContent = data.bio || 'No profile bioRecorded.';
+                    document.getElementById('profBio').textContent = data.bio || 'No profile bio recorded.';
                     document.getElementById('profCreated').textContent = data.created_at || '2026-01-01';
                     document.getElementById('profMsgs').textContent = data.total_messages || '0';
                     toggleModal('userProfileModal', true);
@@ -1109,12 +1141,12 @@
             } catch(err) {}
         }
 
-        async function toggleReaction(msgId, glyph) {
+        async function toggleReaction(msgId, emoji) {
             try {
                 await fetch('/api/chat/react', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({id: msgId, glyph: glyph, user: currentChatName})
+                    body: JSON.stringify({id: msgId, emoji: emoji, user: currentChatName})
                 });
                 fetchMessages();
             } catch(err) {}
@@ -1215,7 +1247,7 @@
 
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
-                        <td style="font-weight: 500;">${info.avatar || '■'} ${info.name}</td>
+                        <td style="font-weight: 500;">${info.avatar || '🔹'} ${info.name}</td>
                         <td style="color: var(--text-muted); font-family: 'JetBrains Mono', monospace; font-size: 11px;">${email}</td>
                         <td><span class="status-badge ${roleBadgeClass}">${info.rank_name || info.role || info.status}</span> ${info.muted ? '<span style="color:var(--danger); font-size:10px;">[MUTED]</span>' : ''}</td>
                         <td style="text-align: right; display: flex; gap: 4px; justify-content: flex-end; align-items: center;">${actionsHtml}</td>
