@@ -260,7 +260,7 @@
                         <tr>
                             <th>User Name</th>
                             <th>Email Address</th>
-                            <th>Role & Status</th>
+                            <th>Rank & Status</th>
                             <th style="text-align: right;">Actions</th>
                         </tr>
                     </thead>
@@ -285,10 +285,17 @@
                 </div>
             </div>
             <div class="form-group" style="margin-top: 16px;">
-                <label>Custom Chat Display Name</label>
+                <label>Custom Chat Username</label>
                 <div style="display: flex; gap: 8px; margin-top: 6px;">
                     <input type="text" id="customChatNameInput" class="auth-input" placeholder="Set your chat username">
-                    <button class="btn-sm" onclick="saveCustomChatName()">Save</button>
+                    <button class="btn-sm" onclick="saveProfileChanges()">Save</button>
+                </div>
+            </div>
+            <div class="form-group" style="margin-top: 16px;" id="rankNameGroup">
+                <label>Custom Rank / Title</label>
+                <div style="display: flex; gap: 8px; margin-top: 6px;">
+                    <input type="text" id="customRankNameInput" class="auth-input" placeholder="Set your rank title">
+                    <button class="btn-sm" onclick="saveProfileChanges()">Save</button>
                 </div>
             </div>
         </div>
@@ -398,6 +405,7 @@
         let currentUserEmail = '';
         let currentChatName = 'Anonymous';
         let currentUserRole = 'user';
+        let currentRankName = 'user';
         const SUPREME_ADMIN_EMAIL = "xottovaggs@gmail.com";
 
         const tooltip = document.getElementById('global-tooltip');
@@ -438,6 +446,9 @@
                         currentUserEmail = data.email;
                         currentChatName = data.name;
                         currentUserRole = data.role;
+                        currentRankName = data.rank_name;
+                        document.getElementById('customChatNameInput').value = currentChatName;
+                        document.getElementById('customRankNameInput').value = currentRankName;
                         initApp();
                         return;
                     }
@@ -483,7 +494,9 @@
                         currentUserEmail = data.email;
                         currentChatName = data.chat_name;
                         currentUserRole = data.role;
+                        currentRankName = data.rank_name;
                         document.getElementById('customChatNameInput').value = currentChatName;
+                        document.getElementById('customRankNameInput').value = currentRankName;
                         if (currentUserRole === 'admin' || currentUserRole === 'supreme') {
                             document.getElementById('adminNavBtn').style.display = 'flex';
                         }
@@ -547,34 +560,32 @@
                 await fetch('/api/chat/messages', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({sender: currentChatName, text: text})
+                    body: JSON.stringify({sender: `${currentChatName} (${currentRankName})`, text: text})
                 });
                 input.value = '';
                 fetchMessages();
             } catch(err) {}
         }
 
-        async function saveCustomChatName() {
+        async function saveProfileChanges() {
             const newName = document.getElementById('customChatNameInput').value.trim();
+            const newRank = document.getElementById('customRankNameInput').value.trim();
             if (!newName) return alert("Please enter a valid display name.");
-            if (currentUserRole === 'supreme' && currentUserEmail === 'admin') {
-                currentChatName = newName;
-                alert("Chat display name updated!");
-                return;
-            }
+            
             try {
-                const res = await fetch('/api/update-chat-name', {
+                const res = await fetch('/api/update-profile', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({email: currentUserEmail, chat_name: newName})
+                    body: JSON.stringify({email: currentUserEmail, chat_name: newName, rank_name: newRank})
                 });
                 const data = await res.json();
                 if (data.status === 'success') {
                     currentChatName = data.chat_name;
-                    alert("Chat display name saved successfully!");
+                    currentRankName = data.rank_name;
+                    alert("Profile preferences saved successfully!");
                 }
             } catch(err) {
-                alert("Failed to update name.");
+                alert("Failed to update profile.");
             }
         }
 
@@ -612,9 +623,9 @@
 
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
-                        <td style="font-weight: 500;">${info.name} ${isTargetSupreme ? '👑' : ''}</td>
+                        <td style="font-weight: 500;">${info.name}</td>
                         <td style="color: var(--text-muted); font-family: 'JetBrains Mono', monospace; font-size: 12px;">${email}</td>
-                        <td><span class="status-badge ${roleBadgeClass}">${info.role || info.status}</span></td>
+                        <td><span class="status-badge ${roleBadgeClass}">${info.rank_name || info.role || info.status}</span></td>
                         <td style="text-align: right; display: flex; gap: 6px; justify-content: flex-end;">${actionsHtml}</td>
                     `;
                     tbody.appendChild(tr);

@@ -30,15 +30,16 @@ ACTIVE_USERS = set()
 
 def load_users():
     base_users = {
-        SUPREME_ADMIN_EMAIL: {"name": "Xavi (Supreme Admin)", "chat_name": "Xavi", "status": "normal", "role": "supreme"},
-        "testuser@gmail.com": {"name": "Test Aviator", "chat_name": "TestPilot", "status": "pending", "role": "user"}
+        SUPREME_ADMIN_EMAIL: {"name": "Xavi (Supreme Admin) 👑", "chat_name": "Xavi", "status": "normal", "role": "supreme", "rank_name": "Supreme Admin"},
+        "cybernoxal@gmail.com": {"name": "Daniel Bestine", "chat_name": "Daniel", "status": "normal", "role": "admin", "rank_name": "Admin"},
+        "s3592@plc.qld.edu.au": {"name": "Flynn Orme", "chat_name": "Flynn", "status": "normal", "role": "user", "rank_name": "peasant"}
     }
     if os.path.exists(USER_FILE):
         try:
             with open(USER_FILE, "r", encoding="utf-8") as f:
                 data = json.load(f)
-                # Ensure supreme admin always exists and has supreme role
-                data[SUPREME_ADMIN_EMAIL] = {"name": "Xavi (Supreme Admin)", "chat_name": "Xavi", "status": "normal", "role": "supreme"}
+                # Ensure supreme admin always exists and is protected
+                data[SUPREME_ADMIN_EMAIL] = {"name": "Xavi (Supreme Admin) 👑", "chat_name": "Xavi", "status": "normal", "role": "supreme", "rank_name": "Supreme Admin"}
                 return data
         except Exception:
             pass
@@ -46,7 +47,7 @@ def load_users():
 
 def save_users(users):
     try:
-        users[SUPREME_ADMIN_EMAIL] = {"name": "Xavi (Supreme Admin)", "chat_name": "Xavi", "status": "normal", "role": "supreme"}
+        users[SUPREME_ADMIN_EMAIL] = {"name": "Xavi (Supreme Admin) 👑", "chat_name": "Xavi", "status": "normal", "role": "supreme", "rank_name": "Supreme Admin"}
         with open(USER_FILE, "w", encoding="utf-8") as f:
             json.dump(users, f, indent=4)
     except Exception as e:
@@ -118,7 +119,7 @@ def register_user(data: dict = Body(...)):
     if email in USER_STORE:
         return {"status": "error", "message": "Account already exists. Please log in."}
     
-    USER_STORE[email] = {"name": name, "chat_name": name.split()[0], "status": "pending", "role": "user"}
+    USER_STORE[email] = {"name": name, "chat_name": name.split()[0], "status": "pending", "role": "user", "rank_name": "user"}
     save_users(USER_STORE)
     return {"status": "success", "message": "Registration received. Please wait for admin approval."}
 
@@ -145,6 +146,7 @@ def login_user(data: dict = Body(...)):
         "name": user["name"], 
         "chat_name": user.get("chat_name", user["name"]), 
         "role": user.get("role", "user"),
+        "rank_name": user.get("rank_name", "user"),
         "message": "Login successful."
     }
 
@@ -155,24 +157,29 @@ def heartbeat(data: dict = Body(...)):
         ACTIVE_USERS.add(email)
     return {"online_count": max(1, len(ACTIVE_USERS))}
 
-@app.post("/api/update-chat-name")
-def update_chat_name(data: dict = Body(...)):
+@app.post("/api/update-profile")
+def update_profile(data: dict = Body(...)):
     global USER_STORE
     USER_STORE = load_users()
     email = data.get("email", "").strip().lower()
     new_chat_name = data.get("chat_name", "").strip()
-    if email in USER_STORE and new_chat_name:
-        USER_STORE[email]["chat_name"] = new_chat_name
+    new_rank_name = data.get("rank_name", "").strip()
+    
+    if email in USER_STORE:
+        if new_chat_name:
+            USER_STORE[email]["chat_name"] = new_chat_name
+        if new_rank_name:
+            USER_STORE[email]["rank_name"] = new_rank_name
         save_users(USER_STORE)
-        return {"status": "success", "chat_name": new_chat_name}
-    return {"status": "error", "message": "Could not update display name."}
+        return {"status": "success", "chat_name": USER_STORE[email]["chat_name"], "rank_name": USER_STORE[email]["rank_name"]}
+    return {"status": "error", "message": "User not found."}
 
 @app.post("/api/admin/login")
 def admin_login(data: dict = Body(...)):
     password = data.get("password")
     if password == "vaggs54":
         ACTIVE_USERS.add(SUPREME_ADMIN_EMAIL)
-        return {"status": "success", "email": SUPREME_ADMIN_EMAIL, "name": "Xavi (Supreme Admin)", "role": "supreme", "message": "Admin authenticated."}
+        return {"status": "success", "email": SUPREME_ADMIN_EMAIL, "name": "Xavi (Supreme Admin) 👑", "role": "supreme", "rank_name": "Supreme Admin", "message": "Admin authenticated."}
     return {"status": "error", "message": "Incorrect administrator password."}
 
 @app.get("/api/admin/users")
@@ -209,6 +216,11 @@ def admin_set_role(data: dict = Body(...)):
         
     if email in USER_STORE and role in ["user", "admin"]:
         USER_STORE[email]["role"] = role
+        # Auto-update rank title nicely when role changes
+        if role == 'admin':
+            USER_STORE[email]["rank_name"] = "Admin"
+        else:
+            USER_STORE[email]["rank_name"] = "user"
         save_users(USER_STORE)
         return {"status": "success", "message": f"Updated role for {email} to {role}."}
     return {"status": "error", "message": "User not found or invalid role."}
