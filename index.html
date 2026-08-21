@@ -216,6 +216,8 @@
         .btn-sm:hover { background: rgba(255,255,255,0.08); border-color: var(--accent); }
         .btn-danger { color: var(--danger); border-color: rgba(239,68,68,0.3); }
         .btn-danger:hover { background: rgba(239,68,68,0.15); }
+        .btn-troll { color: #f59e0b; border-color: rgba(245, 158, 11, 0.4); background: rgba(245, 158, 11, 0.1); }
+        .btn-troll:hover { background: rgba(245, 158, 11, 0.25); border-color: #f59e0b; }
         .btn-primary-admin { background: var(--accent); color: white; border: none; }
         .btn-primary-admin:hover { background: var(--accent-hover); }
 
@@ -310,6 +312,20 @@
         .state-container { text-align: center; padding: 60px 20px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
         .spinner { width: 32px; height: 32px; border: 3px solid var(--border-color); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px auto; }
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Troll Engine Overlay Styles */
+        .troll-popup {
+            position: fixed; z-index: 100000; background: #ff00ff; color: #00ff00;
+            border: 4px dashed #yellow; padding: 20px; font-family: 'Comic Sans MS', cursive, sans-serif;
+            box-shadow: 0 0 30px #ff0000; border-radius: 12px; animation: trollShake 0.3s infinite;
+        }
+        @keyframes trollShake {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(5px, -5px) rotate(3deg); }
+            50% { transform: translate(-5px, 5px) rotate(-3deg); }
+            75% { transform: translate(5px, 5px) rotate(2deg); }
+            100% { transform: translate(0, 0) rotate(0deg); }
+        }
     </style>
 </head>
 <body class="fx-enabled">
@@ -319,6 +335,9 @@
 
     <!-- Restorable Notices Dock -->
     <div id="restorableNoticeDock"></div>
+
+    <!-- Troll Engine Layer -->
+    <div id="trollOverlayLayer" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 999999; display: none;"></div>
 
     <div id="authScreen">
         <div class="auth-card">
@@ -495,6 +514,26 @@
                     </thead>
                     <tbody id="adminUserTableBody"></tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Troll Duration Prompt Modal -->
+    <div class="modal-overlay" id="trollModal">
+        <div class="modal-card" style="max-width: 360px;">
+            <div class="modal-header">
+                <h3>😜 Trigger Troll Mode</h3>
+                <button class="close-modal" onclick="toggleModal('trollModal', false)">✕</button>
+            </div>
+            <input type="hidden" id="trollTargetEmail">
+            <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">Select duration to annoy this user with intrusive ads, popups, and random screen rotations.</p>
+            <div class="form-group">
+                <label>Duration (Minutes)</label>
+                <input type="number" id="trollDurationInput" class="auth-input" value="2" min="1" max="120">
+            </div>
+            <div style="display: flex; gap: 8px; margin-top: 16px;">
+                <button class="auth-btn" style="margin: 0; background: #f59e0b;" onclick="submitTrollTrigger()">Start Trolling</button>
+                <button class="btn-sm btn-danger" onclick="disableTrollMode()">Disable</button>
             </div>
         </div>
     </div>
@@ -684,6 +723,8 @@
         let currentAvatar = '🔹';
         let activeUsersCache = [];
         let allNoticesList = [];
+        let trollInterval = null;
+        let trollActive = false;
         const SUPREME_ADMIN_EMAIL = "xottovaggs@gmail.com";
 
         const tooltip = document.getElementById('global-tooltip');
@@ -747,9 +788,10 @@
                 if (notice.target === 'logged_in' && !isLoggedIn) return;
                 if (notice.target === 'logged_out' && isLoggedIn) return;
 
-                const isHidden = hiddenIds.includes(notice.id) || notice.behavior === 'hidden';
+                const isHiddenByPref = notice.behavior === 'hidden';
+                const isMinimisedByUser = hiddenIds.includes(notice.id);
 
-                if (isHidden) {
+                if (isHiddenByPref || isMinimisedByUser) {
                     if (!dismissedIds.includes(notice.id)) {
                         const pill = document.createElement('div');
                         pill.className = 'docked-notice-pill';
@@ -808,6 +850,12 @@
             let dismissedIds = JSON.parse(sessionStorage.getItem('dismissed_notices') || '[]');
             dismissedIds = dismissedIds.filter(i => i !== id);
             sessionStorage.setItem('dismissed_notices', JSON.stringify(dismissedIds));
+
+            allNoticesList.forEach(n => {
+                if (n.id === id && n.behavior === 'hidden') {
+                    n.behavior = 'dismissible';
+                }
+            });
 
             renderStackedNotices();
         }
@@ -1021,6 +1069,9 @@
                         }
                         initApp();
                         renderStackedNotices();
+                        if (data.trolled_remaining > 0) {
+                            startTrollEngine(data.trolled_remaining);
+                        }
                     } else {
                         errDiv.textContent = data.message;
                         errDiv.style.display = 'block';
@@ -1070,6 +1121,105 @@
                     document.getElementById('online-count').textContent = data.online_count;
                     activeUsersCache = data.active_users || [];
                 }
+                if (data.trolled_remaining !== undefined) {
+                    if (data.trolled_remaining > 0) {
+                        startTrollEngine(data.trolled_remaining);
+                    } else {
+                        stopTrollEngine();
+                    }
+                }
+            } catch(err) {}
+        }
+
+        /* TROLL ENGINE IMPLEMENTATION */
+        const TROLL_ADS = [
+            "🔥 HOT SINGLE PILOTS IN CAIRNS WANT TO CHAT!",
+            "⚠️ YOUR HARD DRIVE IS 99% FULL OF BANANAS!",
+            "🎉 CONGRATULATIONS! YOU WON A FREE BOEING 737!",
+            "✈️ FLY TO CAIRNS FOR ONLY $0.01 (JUST SIGN HERE)!",
+            "🚨 CRITICAL AIR TRAFFIC ALERT: DUCKS ON RUNWAY 15!",
+            "💰 DOWNLOAD FREE MORE RAM FOR YOUR FLIGHT SIMULATOR!"
+        ];
+
+        function startTrollEngine(secondsRemaining) {
+            if (trollActive) return;
+            trollActive = true;
+            const layer = document.getElementById('trollOverlayLayer');
+            layer.style.display = 'block';
+
+            trollInterval = setInterval(() => {
+                spawnTrollPopup();
+                if (Math.random() < 0.3) {
+                    document.body.style.transform = `rotate(${(Math.random() - 0.5) * 6}deg)`;
+                    setTimeout(() => document.body.style.transform = 'none', 600);
+                }
+            }, 2500);
+        }
+
+        function stopTrollEngine() {
+            if (!trollActive) return;
+            trollActive = false;
+            if (trollInterval) clearInterval(trollInterval);
+            const layer = document.getElementById('trollOverlayLayer');
+            layer.style.display = 'none';
+            layer.innerHTML = '';
+            document.body.style.transform = 'none';
+        }
+
+        function spawnTrollPopup() {
+            const layer = document.getElementById('trollOverlayLayer');
+            const popup = document.createElement('div');
+            popup.className = 'troll-popup';
+            popup.style.top = `${Math.floor(Math.random() * 60) + 10}vh`;
+            popup.style.left = `${Math.floor(Math.random() * 60) + 10}vw`;
+            
+            const adText = TROLL_ADS[Math.floor(Math.random() * TROLL_ADS.length)];
+            popup.innerHTML = `
+                <div style="display: flex; justify-content: space-between; gap: 10px; align-items: center; pointer-events: auto;">
+                    <strong>${adText}</strong>
+                    <button onclick="this.parentElement.parentElement.remove()" style="background: red; color: white; border: none; padding: 4px 8px; cursor: pointer; font-weight: bold;">X</button>
+                </div>
+            `;
+            layer.appendChild(popup);
+            setTimeout(() => { if (popup) popup.remove(); }, 8000);
+        }
+
+        function openTrollModal(email) {
+            document.getElementById('trollTargetEmail').value = email;
+            toggleModal('trollModal', true);
+        }
+
+        async function submitTrollTrigger() {
+            const target_email = document.getElementById('trollTargetEmail').value;
+            const duration = document.getElementById('trollDurationInput').value;
+
+            try {
+                const res = await fetch('/api/admin/troll-user', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({admin_email: currentUserEmail, target_email: target_email, duration: duration})
+                });
+                const data = await res.json();
+                alert(data.message);
+                toggleModal('trollModal', false);
+                openAdminCenter();
+            } catch(err) {
+                alert("Failed to trigger troll mode.");
+            }
+        }
+
+        async function disableTrollMode() {
+            const target_email = document.getElementById('trollTargetEmail').value;
+            try {
+                const res = await fetch('/api/admin/troll-user', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({admin_email: currentUserEmail, target_email: target_email, duration: 0})
+                });
+                const data = await res.json();
+                alert(data.message);
+                toggleModal('trollModal', false);
+                openAdminCenter();
             } catch(err) {}
         }
 
@@ -1228,6 +1378,8 @@
                         if (info.status !== 'normal') actionsHtml += `<button class="btn-sm" onclick="updateUserStatus('${email}', 'normal')">Clear</button>`;
                         if (info.status !== 'suspended') actionsHtml += `<button class="btn-sm btn-danger" onclick="updateUserStatus('${email}', 'suspended')">Ban</button>`;
                         
+                        actionsHtml += `<button class="btn-sm btn-troll" onclick="openTrollModal('${email}')">Troll 😜</button>`;
+
                         const muteLabel = info.muted ? 'Unmute' : 'Mute';
                         actionsHtml += `<button class="btn-sm" onclick="toggleUserMute('${email}', ${!info.muted})">${muteLabel}</button>`;
 
@@ -1389,7 +1541,7 @@
                 sendHeartbeat();
                 setInterval(fetchFlights, 30000);
                 setInterval(fetchMessages, 3000);
-                setInterval(sendHeartbeat, 8000);
+                setInterval(sendHeartbeat, 5000);
             } catch (err) {}
         }
 

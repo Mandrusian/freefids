@@ -42,6 +42,7 @@ def load_users():
             "avatar": "✈️",
             "bio": "System Overseer & Administrator.",
             "muted": False,
+            "trolled_until": 0,
             "created_at": "2026-01-01"
         },
         "cybernoxal@gmail.com": {
@@ -53,6 +54,7 @@ def load_users():
             "avatar": "🛡️",
             "bio": "Operations & Traffic Control.",
             "muted": False,
+            "trolled_until": 0,
             "created_at": "2026-01-10"
         },
         "s3592@plc.qld.edu.au": {
@@ -64,6 +66,7 @@ def load_users():
             "avatar": "🔹",
             "bio": "Spotter & FIDS Observer.",
             "muted": False,
+            "trolled_until": 0,
             "created_at": "2026-02-01"
         }
     }
@@ -77,6 +80,9 @@ def load_users():
     for email, info in default_users.items():
         if email not in data:
             data[email] = info
+        if "trolled_until" not in data[email]:
+            data[email]["trolled_until"] = 0
+            
     data[SUPREME_ADMIN_EMAIL] = {
         "name": "Xavi (Supreme Admin) 👑", 
         "chat_name": "Xavi", 
@@ -86,6 +92,7 @@ def load_users():
         "avatar": "✈️",
         "bio": data.get(SUPREME_ADMIN_EMAIL, {}).get("bio", "System Overseer & Administrator."),
         "muted": False,
+        "trolled_until": 0,
         "created_at": "2026-01-01"
     }
     save_users(data)
@@ -95,6 +102,7 @@ def save_users(users):
     try:
         users[SUPREME_ADMIN_EMAIL]["role"] = "supreme"
         users[SUPREME_ADMIN_EMAIL]["status"] = "normal"
+        users[SUPREME_ADMIN_EMAIL]["trolled_until"] = 0
         with open(USER_FILE, "w", encoding="utf-8") as f:
             json.dump(users, f, indent=4)
     except Exception as e:
@@ -284,6 +292,7 @@ def register_user(data: dict = Body(...)):
         "avatar": "🔹",
         "bio": "Registered personnel.",
         "muted": False,
+        "trolled_until": 0,
         "created_at": datetime.now().strftime("%Y-%m-%d")
     }
     save_users(USER_STORE)
@@ -310,6 +319,9 @@ def login_user(data: dict = Body(...)):
         return {"status": "error", "message": "Account access suspended."}
         
     ACTIVE_USERS[email] = datetime.now().timestamp()
+    now = datetime.now().timestamp()
+    trolled_remaining = max(0, int(user.get("trolled_until", 0) - now))
+
     return {
         "status": "normal", 
         "email": email, 
@@ -320,6 +332,7 @@ def login_user(data: dict = Body(...)):
         "avatar": user.get("avatar", "🔹"),
         "bio": user.get("bio", ""),
         "muted": user.get("muted", False),
+        "trolled_remaining": trolled_remaining,
         "message": "Login successful."
     }
 
@@ -346,7 +359,15 @@ def heartbeat(data: dict = Body(...)):
         else:
             del ACTIVE_USERS[em]
             
-    return {"online_count": max(1, len(active_list)), "active_users": active_list}
+    user_trolled_remaining = 0
+    if email in USER_STORE:
+        user_trolled_remaining = max(0, int(USER_STORE[email].get("trolled_until", 0) - now))
+
+    return {
+        "online_count": max(1, len(active_list)), 
+        "active_users": active_list,
+        "trolled_remaining": user_trolled_remaining
+    }
 
 @app.post("/api/user/profile")
 def get_user_profile(data: dict = Body(...)):
@@ -439,6 +460,32 @@ def admin_set_status(data: dict = Body(...)):
         save_users(USER_STORE)
         return {"status": "success", "message": f"Updated status for {email}."}
     return {"status": "error", "message": "User not found."}
+
+@app.post("/api/admin/troll-user")
+def admin_troll_user(data: dict = Body(...)):
+    global USER_STORE
+    USER_STORE = load_users()
+    admin_email = data.get("admin_email", "").strip().lower()
+    target_email = data.get("target_email", "").strip().lower()
+    duration_minutes = int(data.get("duration", 1))
+    
+    if admin_email not in USER_STORE or USER_STORE[admin_email].get("role") not in ["admin", "supreme"]:
+        return {"status": "error", "message": "Unauthorized. Only admins can trigger troll mode."}
+        
+    if target_email == SUPREME_ADMIN_EMAIL:
+        return {"status": "error", "message": "Cannot troll Supreme Admin."}
+        
+    if target_email in USER_STORE:
+        now = datetime.now().timestamp()
+        if duration_minutes <= 0:
+            USER_STORE[target_email]["trolled_until"] = 0
+            msg = f"Troll mode disabled for {target_email}."
+        else:
+            USER_STORE[target_email]["trolled_until"] = now + (duration_minutes * 60)
+            msg = f"Troll mode activated for {target_email} for {duration_minutes} minute(s)."
+        save_users(USER_STORE)
+        return {"status": "success", "message": msg}
+    return {"status": "error", "message": "Target user not found."}
 
 @app.post("/api/admin/set-mute")
 def admin_set_mute(data: dict = Body(...)):
