@@ -87,6 +87,8 @@ def load_users():
             data[email]["trolled_until"] = 0
         if "notes" not in data[email]:
             data[email]["notes"] = ""
+        if "bio" not in data[email]:
+            data[email]["bio"] = "Registered personnel."
             
     data[SUPREME_ADMIN_EMAIL] = {
         "name": "Xavi (Supreme Admin) 👑", 
@@ -188,7 +190,7 @@ SYSTEM_STATE_STORE = load_system_state()
 
 def authenticate_session():
     try:
-        login_page = session.get("https://flights.cairnsairport.com.au/login")
+        login_page = session.get("https://flights.cairnsairport.com.au/login", timeout=5)
         xsrf_cookie = session.cookies.get("XSRF-TOKEN")
         soup = BeautifulSoup(login_page.text, "html.parser")
         token_input = soup.find("input", {"name": "_token"})
@@ -199,11 +201,11 @@ def authenticate_session():
             "Referer": "https://flights.cairnsairport.com.au/login"
         }
         payload = {"_token": csrf_token, "email": SUPREME_ADMIN_EMAIL, "password": PASSWORD}
-        login_response = session.post("https://flights.cairnsairport.com.au/login", data=payload, headers=headers)
+        login_response = session.post("https://flights.cairnsairport.com.au/login", data=payload, headers=headers, timeout=5)
         if login_response.status_code in [200, 302]:
             return True
         return False
-    except Exception as e:
+    except Exception:
         return False
 
 authenticate_session()
@@ -320,7 +322,17 @@ def login_user(data: dict = Body(...)):
         return {"status": "pending", "message": "Your account is awaiting clearance from Cairns Airport administration."}
     
     if user["status"] == "suspended":
-        return {"status": "error", "message": "Account access suspended."}
+        return {
+            "status": "suspended", 
+            "email": email,
+            "name": user["name"],
+            "chat_name": user.get("chat_name", user["name"]),
+            "role": user.get("role", "user"),
+            "rank_name": user.get("rank_name", "Peasant"),
+            "avatar": user.get("avatar", "🔹"),
+            "notes": user.get("notes", ""),
+            "message": "Account access suspended. Restricted to Chat and Notice telemetry."
+        }
         
     ACTIVE_USERS[email] = datetime.now().timestamp()
     now = datetime.now().timestamp()
@@ -359,18 +371,23 @@ def heartbeat(data: dict = Body(...)):
                     "name": USER_STORE[em]["name"],
                     "role": USER_STORE[em].get("role", "user"),
                     "rank_name": USER_STORE[em].get("rank_name", "user"),
-                    "chat_name": USER_STORE[em].get("chat_name", "User")
+                    "chat_name": USER_STORE[em].get("chat_name", "User"),
+                    "avatar": USER_STORE[em].get("avatar", "🔹"),
+                    "status": USER_STORE[em].get("status", "normal")
                 })
         else:
             del ACTIVE_USERS[em]
             
+    user_status = "normal"
     user_trolled_remaining = 0
     if email in USER_STORE:
+        user_status = USER_STORE[email].get("status", "normal")
         user_trolled_remaining = max(0, int(USER_STORE[email].get("trolled_until", 0) - now))
 
     return {
         "online_count": max(1, len(active_list)), 
         "active_users": active_list,
+        "user_status": user_status,
         "trolled_remaining": user_trolled_remaining
     }
 
@@ -408,6 +425,7 @@ def get_user_profile(data: dict = Body(...)):
         "bio": info.get("bio", "No profile bio recorded."),
         "notes": info.get("notes", ""),
         "muted": info.get("muted", False),
+        "user_status": info.get("status", "normal"),
         "created_at": info.get("created_at", "2026-01-01"),
         "total_messages": msg_count
     }
@@ -464,7 +482,7 @@ def admin_set_status(data: dict = Body(...)):
     if email in USER_STORE and status in ["normal", "pending", "suspended"]:
         USER_STORE[email]["status"] = status
         save_users(USER_STORE)
-        return {"status": "success", "message": f"Updated status for {email}."}
+        return {"status": "success", "message": f"Updated status for {email} to {status}."}
     return {"status": "error", "message": "User not found."}
 
 @app.post("/api/admin/troll-user")
@@ -534,12 +552,13 @@ def admin_force_edit_user(data: dict = Body(...)):
     global USER_STORE
     USER_STORE = load_users()
     email = data.get("email", "").strip().lower()
+    admin_email = data.get("admin_email", "").strip().lower()
     new_name = data.get("name", "").strip()
     new_chat_name = data.get("chat_name", "").strip()
     new_rank_name = data.get("rank_name", "").strip()
     new_notes = data.get("notes", "").strip()
     
-    if email == SUPREME_ADMIN_EMAIL and data.get("admin_email") != SUPREME_ADMIN_EMAIL:
+    if email == SUPREME_ADMIN_EMAIL and admin_email != SUPREME_ADMIN_EMAIL:
         return {"status": "error", "message": "Cannot override Supreme Admin account."}
         
     if email in USER_STORE:
@@ -707,10 +726,10 @@ def clear_chat(data: dict = Body(...)):
 @app.get("/api/flights")
 def get_flights():
     try:
-        response = session.get("https://flights.cairnsairport.com.au/flights/data")
+        response = session.get("https://flights.cairnsairport.com.au/flights/data", timeout=5)
         if "login" in response.url or response.status_code != 200:
             authenticate_session()
-            response = session.get("https://flights.cairnsairport.com.au/flights/data")
+            response = session.get("https://flights.cairnsairport.com.au/flights/data", timeout=5)
             
         data = response.json()
         live_flights = data.get("flights", []) if isinstance(data, dict) else []
@@ -718,7 +737,7 @@ def get_flights():
         custom_list = load_custom_flights()
         combined = custom_list + live_flights
         return {"flights": combined}
-    except Exception as e:
+    except Exception:
         custom_list = load_custom_flights()
         return {"flights": custom_list}
 
