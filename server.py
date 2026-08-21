@@ -41,6 +41,7 @@ def load_users():
             "rank_name": "Supreme",
             "avatar": "✈️",
             "bio": "System Overseer & Administrator.",
+            "notes": "System Creator & Supreme Operational Lead.",
             "muted": False,
             "trolled_until": 0,
             "created_at": "2026-01-01"
@@ -53,6 +54,7 @@ def load_users():
             "rank_name": "Admin",
             "avatar": "🛡️",
             "bio": "Operations & Traffic Control.",
+            "notes": "",
             "muted": False,
             "trolled_until": 0,
             "created_at": "2026-01-10"
@@ -65,6 +67,7 @@ def load_users():
             "rank_name": "Peasant",
             "avatar": "🔹",
             "bio": "Spotter & FIDS Observer.",
+            "notes": "",
             "muted": False,
             "trolled_until": 0,
             "created_at": "2026-02-01"
@@ -82,6 +85,8 @@ def load_users():
             data[email] = info
         if "trolled_until" not in data[email]:
             data[email]["trolled_until"] = 0
+        if "notes" not in data[email]:
+            data[email]["notes"] = ""
             
     data[SUPREME_ADMIN_EMAIL] = {
         "name": "Xavi (Supreme Admin) 👑", 
@@ -91,6 +96,7 @@ def load_users():
         "rank_name": "Supreme",
         "avatar": "✈️",
         "bio": data.get(SUPREME_ADMIN_EMAIL, {}).get("bio", "System Overseer & Administrator."),
+        "notes": data.get(SUPREME_ADMIN_EMAIL, {}).get("notes", "System Creator & Supreme Operational Lead."),
         "muted": False,
         "trolled_until": 0,
         "created_at": "2026-01-01"
@@ -181,7 +187,6 @@ CUSTOM_FLIGHTS_STORE = load_custom_flights()
 SYSTEM_STATE_STORE = load_system_state()
 
 def authenticate_session():
-    print("Authenticating with Cairns Airport FIDS...")
     try:
         login_page = session.get("https://flights.cairnsairport.com.au/login")
         xsrf_cookie = session.cookies.get("XSRF-TOKEN")
@@ -196,11 +201,9 @@ def authenticate_session():
         payload = {"_token": csrf_token, "email": SUPREME_ADMIN_EMAIL, "password": PASSWORD}
         login_response = session.post("https://flights.cairnsairport.com.au/login", data=payload, headers=headers)
         if login_response.status_code in [200, 302]:
-            print("Authentication successful.")
             return True
         return False
     except Exception as e:
-        print(f"Auth error: {e}")
         return False
 
 authenticate_session()
@@ -291,6 +294,7 @@ def register_user(data: dict = Body(...)):
         "rank_name": "Peasant",
         "avatar": "🔹",
         "bio": "Registered personnel.",
+        "notes": "",
         "muted": False,
         "trolled_until": 0,
         "created_at": datetime.now().strftime("%Y-%m-%d")
@@ -331,6 +335,7 @@ def login_user(data: dict = Body(...)):
         "rank_name": user.get("rank_name", "Peasant"),
         "avatar": user.get("avatar", "🔹"),
         "bio": user.get("bio", ""),
+        "notes": user.get("notes", ""),
         "muted": user.get("muted", False),
         "trolled_remaining": trolled_remaining,
         "message": "Login successful."
@@ -401,6 +406,7 @@ def get_user_profile(data: dict = Body(...)):
         "rank_name": info.get("rank_name"),
         "avatar": info.get("avatar", "🔹"),
         "bio": info.get("bio", "No profile bio recorded."),
+        "notes": info.get("notes", ""),
         "muted": info.get("muted", False),
         "created_at": info.get("created_at", "2026-01-01"),
         "total_messages": msg_count
@@ -531,14 +537,16 @@ def admin_force_edit_user(data: dict = Body(...)):
     new_name = data.get("name", "").strip()
     new_chat_name = data.get("chat_name", "").strip()
     new_rank_name = data.get("rank_name", "").strip()
+    new_notes = data.get("notes", "").strip()
     
-    if email == SUPREME_ADMIN_EMAIL:
+    if email == SUPREME_ADMIN_EMAIL and data.get("admin_email") != SUPREME_ADMIN_EMAIL:
         return {"status": "error", "message": "Cannot override Supreme Admin account."}
         
     if email in USER_STORE:
         if new_name: USER_STORE[email]["name"] = new_name
         if new_chat_name: USER_STORE[email]["chat_name"] = new_chat_name
         if new_rank_name: USER_STORE[email]["rank_name"] = new_rank_name
+        USER_STORE[email]["notes"] = new_notes
         save_users(USER_STORE)
         return {"status": "success", "message": f"Updated user profile for {email}."}
     return {"status": "error", "message": "User not found."}

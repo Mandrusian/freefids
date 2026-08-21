@@ -84,7 +84,6 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
         body { background-color: var(--bg-primary); color: var(--text-main); min-height: 100vh; overflow-x: hidden; }
 
-        /* Stacked Notices Engine */
         #noticesContainer {
             width: 100%; display: flex; flex-direction: column; gap: 2px;
             position: sticky; top: 0; z-index: 99999; box-shadow: 0 4px 16px rgba(0,0,0,0.5);
@@ -94,7 +93,9 @@
             display: flex; justify-content: space-between; align-items: center; gap: 16px;
             backdrop-filter: blur(8px);
         }
-        body.fx-enabled .notice-bar { animation: slideDown 0.25s ease-out; }
+        body.fx-enabled .notice-bar.animated-entrance { 
+            animation: slideDown 0.25s ease-out forwards; 
+        }
         @keyframes slideDown { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         .notice-content { display: flex; align-items: center; gap: 10px; flex: 1; flex-wrap: wrap; }
         .notice-tag { font-weight: 800; text-transform: uppercase; font-size: 10px; letter-spacing: 0.5px; padding: 2px 8px; background: rgba(0,0,0,0.3); border-radius: 4px; font-family: 'JetBrains Mono', monospace; }
@@ -313,10 +314,9 @@
         .spinner { width: 32px; height: 32px; border: 3px solid var(--border-color); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px auto; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* Troll Engine Overlay Styles */
         .troll-popup {
             position: fixed; z-index: 100000; background: #ff00ff; color: #00ff00;
-            border: 4px dashed #yellow; padding: 20px; font-family: 'Comic Sans MS', cursive, sans-serif;
+            border: 4px dashed yellow; padding: 20px; font-family: 'Comic Sans MS', cursive, sans-serif;
             box-shadow: 0 0 30px #ff0000; border-radius: 12px; animation: trollShake 0.3s infinite;
         }
         @keyframes trollShake {
@@ -330,13 +330,8 @@
 </head>
 <body class="fx-enabled">
 
-    <!-- Stacked Notices Container -->
     <div id="noticesContainer"></div>
-
-    <!-- Restorable Notices Dock -->
     <div id="restorableNoticeDock"></div>
-
-    <!-- Troll Engine Layer -->
     <div id="trollOverlayLayer" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 999999; display: none;"></div>
 
     <div id="authScreen">
@@ -365,7 +360,7 @@
 
     <!-- User Public Profile Modal -->
     <div class="modal-overlay" id="userProfileModal">
-        <div class="modal-card" style="max-width: 400px;">
+        <div class="modal-card" style="max-width: 420px;">
             <div class="modal-header">
                 <h3>Personnel Profile</h3>
                 <button class="close-modal" onclick="toggleModal('userProfileModal', false)">✕</button>
@@ -375,9 +370,17 @@
                 <h4 id="profName" style="font-size: 16px; font-weight: 800;">---</h4>
                 <p id="profRank" style="font-size: 11px; color: var(--accent); font-family: 'JetBrains Mono', monospace; font-weight: 700; margin-top: 2px;">PEASANT</p>
                 <p id="profEmail" style="font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; margin-top: 2px;">---</p>
-                <div style="background: var(--bg-primary); border: 1px solid var(--border-color); padding: 12px; border-radius: 6px; margin: 16px 0; text-align: left; font-size: 12px; color: var(--text-main);" id="profBio">
-                    ---
+                
+                <div style="background: var(--bg-primary); border: 1px solid var(--border-color); padding: 12px; border-radius: 6px; margin: 14px 0; text-align: left; font-size: 12px; color: var(--text-main);">
+                    <span style="font-size: 9px; color: var(--text-muted); display: block; text-transform: uppercase; font-weight: 700; margin-bottom: 4px;">User Bio</span>
+                    <div id="profBio">---</div>
                 </div>
+
+                <div style="background: rgba(2, 132, 199, 0.08); border: 1px solid var(--border-color); padding: 12px; border-radius: 6px; margin-bottom: 16px; text-align: left; font-size: 12px; color: var(--text-main);">
+                    <span style="font-size: 9px; color: var(--accent); display: block; text-transform: uppercase; font-weight: 800; margin-bottom: 4px; letter-spacing: 0.5px;">📋 Public Admin Notes</span>
+                    <div id="profNotes" style="font-style: italic; color: var(--text-main);">No administrative notes added.</div>
+                </div>
+
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 11px; text-align: left;">
                     <div style="background: var(--bg-primary); padding: 8px; border-radius: 6px; border: 1px solid var(--border-color);">
                         <span style="color: var(--text-muted); display: block; font-size: 9px; text-transform: uppercase;">Cleared Since</span>
@@ -414,7 +417,6 @@
                 </div>
             </div>
 
-            <!-- Admin Ops Switchboard -->
             <div style="background: var(--bg-primary); border: 1px solid var(--border-color); padding: 16px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; gap: 16px;">
                 <div>
                     <strong style="font-size: 13px; font-weight: 700; display: block;">System Maintenance Mode</strong>
@@ -426,7 +428,6 @@
                 </label>
             </div>
 
-            <!-- Custom Flight Injection Form -->
             <div style="background: var(--bg-primary); border: 1px solid var(--border-color); padding: 16px; border-radius: 8px; margin-bottom: 20px;">
                 <h4 style="font-size: 12px; font-weight: 800; margin-bottom: 12px; color: var(--accent); text-transform: uppercase;">Manual Flight Telemetry Injection</h4>
                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px;">
@@ -446,7 +447,6 @@
                 <button class="btn-sm btn-primary-admin" onclick="injectCustomFlight()">Inject Telemetry Record</button>
             </div>
 
-            <!-- Stacked Notices Manager -->
             <div style="background: var(--bg-primary); border: 1px solid var(--border-color); padding: 16px; border-radius: 8px; margin-bottom: 20px;">
                 <h4 style="font-size: 12px; font-weight: 800; margin-bottom: 12px; color: var(--accent); text-transform: uppercase;">📢 Notice Stack Manager</h4>
                 
@@ -538,11 +538,11 @@
         </div>
     </div>
 
-    <!-- User Override Modal -->
+    <!-- User Override & Admin Notes Modal -->
     <div class="modal-overlay" id="overrideModal">
-        <div class="modal-card" style="max-width: 420px;">
+        <div class="modal-card" style="max-width: 450px;">
             <div class="modal-header">
-                <h3 id="overrideModalTitle">Control Account</h3>
+                <h3 id="overrideModalTitle">Control Account & Notes</h3>
                 <button class="close-modal" onclick="toggleModal('overrideModal', false)">✕</button>
             </div>
             <input type="hidden" id="overrideTargetEmail">
@@ -550,16 +550,20 @@
                 <label>Full Name</label>
                 <input type="text" id="overrideName" class="auth-input">
             </div>
-            <div class="form-group" style="margin-top: 14px;">
+            <div class="form-group" style="margin-top: 12px;">
                 <label>Chat Display Name</label>
                 <input type="text" id="overrideChatName" class="auth-input">
             </div>
-            <div class="form-group" style="margin-top: 14px;">
+            <div class="form-group" style="margin-top: 12px;">
                 <label>Rank Title</label>
                 <input type="text" id="overrideRankName" class="auth-input">
             </div>
+            <div class="form-group" style="margin-top: 12px;">
+                <label>📋 Public User Notes (Visible to all users on profile)</label>
+                <textarea id="overrideNotes" class="auth-input" rows="3" placeholder="Add administrative notes or observations about this user..."></textarea>
+            </div>
             <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button class="auth-btn" style="margin: 0;" onclick="saveUserOverride()">Save Changes</button>
+                <button class="auth-btn" style="margin: 0;" onclick="saveUserOverride()">Save Account Data</button>
             </div>
         </div>
     </div>
@@ -725,6 +729,7 @@
         let allNoticesList = [];
         let trollInterval = null;
         let trollActive = false;
+        let renderedNoticeIds = new Set();
         const SUPREME_ADMIN_EMAIL = "xottovaggs@gmail.com";
 
         const tooltip = document.getElementById('global-tooltip');
@@ -777,17 +782,28 @@
         function renderStackedNotices() {
             const container = document.getElementById('noticesContainer');
             const dock = document.getElementById('restorableNoticeDock');
-            container.innerHTML = '';
-            dock.innerHTML = '';
 
             const dismissedIds = JSON.parse(sessionStorage.getItem('dismissed_notices') || '[]');
             const hiddenIds = JSON.parse(sessionStorage.getItem('hidden_notices') || '[]');
 
-            allNoticesList.forEach(notice => {
+            const activeNotices = allNoticesList.filter(notice => {
                 const isLoggedIn = Boolean(currentUserEmail);
-                if (notice.target === 'logged_in' && !isLoggedIn) return;
-                if (notice.target === 'logged_out' && isLoggedIn) return;
+                if (notice.target === 'logged_in' && !isLoggedIn) return false;
+                if (notice.target === 'logged_out' && isLoggedIn) return false;
+                return true;
+            });
 
+            dock.innerHTML = '';
+            
+            Array.from(container.children).forEach(child => {
+                const id = parseInt(child.getAttribute('data-notice-id'));
+                if (!activeNotices.some(n => n.id === id) || dismissedIds.includes(id) || hiddenIds.includes(id)) {
+                    child.remove();
+                    renderedNoticeIds.delete(id);
+                }
+            });
+
+            activeNotices.forEach(notice => {
                 const isHiddenByPref = notice.behavior === 'hidden';
                 const isMinimisedByUser = hiddenIds.includes(notice.id);
 
@@ -804,27 +820,35 @@
 
                 if (notice.behavior === 'dismissible' && dismissedIds.includes(notice.id)) return;
 
-                const bar = document.createElement('div');
-                bar.className = 'notice-bar';
-                bar.style.background = notice.color || '#0284c7';
-                bar.style.color = '#ffffff';
+                if (!renderedNoticeIds.has(notice.id)) {
+                    const bar = document.createElement('div');
+                    bar.className = 'notice-bar animated-entrance';
+                    bar.setAttribute('data-notice-id', notice.id);
+                    bar.style.background = notice.color || '#0284c7';
+                    bar.style.color = '#ffffff';
 
-                let actionBtns = '';
-                if (notice.behavior === 'dismissible') {
-                    actionBtns += `<button class="notice-action-btn" onclick="dismissSingleNotice(${notice.id})">Dismiss</button>`;
-                }
-                if (notice.behavior !== 'sticky') {
-                    actionBtns += `<button class="notice-action-btn" onclick="hideSingleNotice(${notice.id})">Minimize</button>`;
-                }
+                    let actionBtns = '';
+                    if (notice.behavior === 'dismissible') {
+                        actionBtns += `<button class="notice-action-btn" onclick="dismissSingleNotice(${notice.id})">Dismiss</button>`;
+                    }
+                    if (notice.behavior !== 'sticky') {
+                        actionBtns += `<button class="notice-action-btn" onclick="hideSingleNotice(${notice.id})">Minimize</button>`;
+                    }
 
-                bar.innerHTML = `
-                    <div class="notice-content">
-                        ${notice.title ? `<span class="notice-tag">${notice.title}</span>` : ''}
-                        <span>${notice.msg}</span>
-                    </div>
-                    <div class="notice-btn-group">${actionBtns}</div>
-                `;
-                container.appendChild(bar);
+                    bar.innerHTML = `
+                        <div class="notice-content">
+                            ${notice.title ? `<span class="notice-tag">${notice.title}</span>` : ''}
+                            <span>${notice.msg}</span>
+                        </div>
+                        <div class="notice-btn-group">${actionBtns}</div>
+                    `;
+                    container.appendChild(bar);
+                    renderedNoticeIds.add(notice.id);
+
+                    setTimeout(() => {
+                        bar.classList.remove('animated-entrance');
+                    }, 300);
+                }
             });
         }
 
@@ -1131,7 +1155,6 @@
             } catch(err) {}
         }
 
-        /* TROLL ENGINE IMPLEMENTATION */
         const TROLL_ADS = [
             "🔥 HOT SINGLE PILOTS IN CAIRNS WANT TO CHAT!",
             "⚠️ YOUR HARD DRIVE IS 99% FULL OF BANANAS!",
@@ -1284,6 +1307,7 @@
                     document.getElementById('profRank').textContent = (data.rank_name || data.role).toUpperCase();
                     document.getElementById('profEmail').textContent = data.email;
                     document.getElementById('profBio').textContent = data.bio || 'No profile bio recorded.';
+                    document.getElementById('profNotes').textContent = data.notes && data.notes.trim() ? data.notes : 'No administrative notes recorded for this user profile.';
                     document.getElementById('profCreated').textContent = data.created_at || '2026-01-01';
                     document.getElementById('profMsgs').textContent = data.total_messages || '0';
                     toggleModal('userProfileModal', true);
@@ -1374,6 +1398,8 @@
                     const roleBadgeClass = info.role === 'supreme' ? 'badge-supreme' : (info.role === 'admin' ? 'badge-admin' : `badge-${info.status}`);
                     
                     let actionsHtml = '';
+                    actionsHtml += `<button class="btn-sm" onclick="openOverrideModal('${email}', '${info.name.replace(/'/g, "\\'")}', '${(info.chat_name || '').replace(/'/g, "\\'")}', '${(info.rank_name || '').replace(/'/g, "\\'")}', '${(info.notes || '').replace(/'/g, "\\'").replace(/\n/g, '\\n')}')">Notes & Edit</button>`;
+
                     if (!isTargetSupreme) {
                         if (info.status !== 'normal') actionsHtml += `<button class="btn-sm" onclick="updateUserStatus('${email}', 'normal')">Clear</button>`;
                         if (info.status !== 'suspended') actionsHtml += `<button class="btn-sm btn-danger" onclick="updateUserStatus('${email}', 'suspended')">Ban</button>`;
@@ -1382,8 +1408,6 @@
 
                         const muteLabel = info.muted ? 'Unmute' : 'Mute';
                         actionsHtml += `<button class="btn-sm" onclick="toggleUserMute('${email}', ${!info.muted})">${muteLabel}</button>`;
-
-                        actionsHtml += `<button class="btn-sm" onclick="openOverrideModal('${email}', '${info.name}', '${info.chat_name || ''}', '${info.rank_name || ''}')">Edit</button>`;
 
                         if (currentUserRole === 'supreme') {
                             if (info.role === 'admin') {
@@ -1394,7 +1418,7 @@
                         }
                         actionsHtml += `<button class="btn-sm btn-danger" onclick="deleteUser('${email}')">Del</button>`;
                     } else {
-                        actionsHtml = `<span style="font-size: 10px; color: var(--text-muted);">Protected</span>`;
+                        actionsHtml += `<span style="font-size: 10px; color: var(--text-muted); margin-left: 4px;">Protected</span>`;
                     }
 
                     const tr = document.createElement('tr');
@@ -1413,11 +1437,12 @@
             } catch(err) {}
         }
 
-        function openOverrideModal(email, name, chatName, rankName) {
+        function openOverrideModal(email, name, chatName, rankName, notes) {
             document.getElementById('overrideTargetEmail').value = email;
             document.getElementById('overrideName').value = name;
             document.getElementById('overrideChatName').value = chatName || name;
             document.getElementById('overrideRankName').value = rankName || 'Peasant';
+            document.getElementById('overrideNotes').value = notes || '';
             document.getElementById('overrideModalTitle').textContent = `Account: ${name}`;
             toggleModal('overrideModal', true);
         }
@@ -1427,12 +1452,13 @@
             const name = document.getElementById('overrideName').value.trim();
             const chat_name = document.getElementById('overrideChatName').value.trim();
             const rank_name = document.getElementById('overrideRankName').value.trim();
+            const notes = document.getElementById('overrideNotes').value.trim();
 
             try {
                 const res = await fetch('/api/admin/force-edit-user', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({email, name, chat_name, rank_name})
+                    body: JSON.stringify({admin_email: currentUserEmail, email, name, chat_name, rank_name, notes})
                 });
                 const data = await res.json();
                 if (data.status === 'success') {
