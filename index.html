@@ -441,7 +441,7 @@
                     if (data.status === 'success') {
                         document.getElementById('authScreen').style.display = 'none';
                         document.getElementById('appContainer').style.display = 'block';
-                        document.getElementById('userWelcomeBanner').textContent = "SUPREME ADMIN PORTAL";
+                        document.getElementById('userWelcomeBanner').textContent = "SUPREME";
                         document.getElementById('adminNavBtn').style.display = 'flex';
                         currentUserEmail = data.email;
                         currentChatName = data.name;
@@ -490,7 +490,7 @@
                     if (data.status === 'normal') {
                         document.getElementById('authScreen').style.display = 'none';
                         document.getElementById('appContainer').style.display = 'block';
-                        document.getElementById('userWelcomeBanner').textContent = `LOGGED IN AS ${data.name.toUpperCase()}`;
+                        document.getElementById('userWelcomeBanner').textContent = data.role === 'supreme' ? "SUPREME" : data.rank_name.toUpperCase();
                         currentUserEmail = data.email;
                         currentChatName = data.chat_name;
                         currentUserRole = data.role;
@@ -582,6 +582,7 @@
                 if (data.status === 'success') {
                     currentChatName = data.chat_name;
                     currentRankName = data.rank_name;
+                    document.getElementById('userWelcomeBanner').textContent = currentUserRole === 'supreme' ? "SUPREME" : currentRankName.toUpperCase();
                     alert("Profile preferences saved successfully!");
                 }
             } catch(err) {
@@ -608,7 +609,6 @@
                         if (info.status !== 'normal') actionsHtml += `<button class="btn-sm" onclick="updateUserStatus('${email}', 'normal')">Approve</button>`;
                         if (info.status !== 'suspended') actionsHtml += `<button class="btn-sm btn-danger" onclick="updateUserStatus('${email}', 'suspended')">Suspend</button>`;
                         
-                        // Only Supreme Admin can promote/demote sub-admins
                         if (currentUserRole === 'supreme') {
                             if (info.role === 'admin') {
                                 actionsHtml += `<button class="btn-sm" onclick="setUserRole('${email}', 'user')">Demote</button>`;

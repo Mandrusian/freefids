@@ -29,25 +29,34 @@ CHAT_FILE = "chats.json"
 ACTIVE_USERS = set()
 
 def load_users():
-    base_users = {
-        SUPREME_ADMIN_EMAIL: {"name": "Xavi (Supreme Admin) 👑", "chat_name": "Xavi", "status": "normal", "role": "supreme", "rank_name": "Supreme Admin"},
+    default_users = {
+        SUPREME_ADMIN_EMAIL: {"name": "Xavi (Supreme Admin) 👑", "chat_name": "Xavi", "status": "normal", "role": "supreme", "rank_name": "Supreme"},
         "cybernoxal@gmail.com": {"name": "Daniel Bestine", "chat_name": "Daniel", "status": "normal", "role": "admin", "rank_name": "Admin"},
         "s3592@plc.qld.edu.au": {"name": "Flynn Orme", "chat_name": "Flynn", "status": "normal", "role": "user", "rank_name": "peasant"}
     }
+    
+    data = {}
     if os.path.exists(USER_FILE):
         try:
             with open(USER_FILE, "r", encoding="utf-8") as f:
                 data = json.load(f)
-                # Ensure supreme admin always exists and is protected
-                data[SUPREME_ADMIN_EMAIL] = {"name": "Xavi (Supreme Admin) 👑", "chat_name": "Xavi", "status": "normal", "role": "supreme", "rank_name": "Supreme Admin"}
-                return data
         except Exception:
             pass
-    return base_users
+            
+    # Ensure all default users are always present and updated
+    for email, info in default_users.items():
+        if email not in data:
+            data[email] = info
+            
+    # Always enforce absolute protection & correct rank for Supreme Admin
+    data[SUPREME_ADMIN_EMAIL] = {"name": "Xavi (Supreme Admin) 👑", "chat_name": "Xavi", "status": "normal", "role": "supreme", "rank_name": "Supreme"}
+    
+    save_users(data)
+    return data
 
 def save_users(users):
     try:
-        users[SUPREME_ADMIN_EMAIL] = {"name": "Xavi (Supreme Admin) 👑", "chat_name": "Xavi", "status": "normal", "role": "supreme", "rank_name": "Supreme Admin"}
+        users[SUPREME_ADMIN_EMAIL] = {"name": "Xavi (Supreme Admin) 👑", "chat_name": "Xavi", "status": "normal", "role": "supreme", "rank_name": "Supreme"}
         with open(USER_FILE, "w", encoding="utf-8") as f:
             json.dump(users, f, indent=4)
     except Exception as e:
@@ -179,7 +188,7 @@ def admin_login(data: dict = Body(...)):
     password = data.get("password")
     if password == "vaggs54":
         ACTIVE_USERS.add(SUPREME_ADMIN_EMAIL)
-        return {"status": "success", "email": SUPREME_ADMIN_EMAIL, "name": "Xavi (Supreme Admin) 👑", "role": "supreme", "rank_name": "Supreme Admin", "message": "Admin authenticated."}
+        return {"status": "success", "email": SUPREME_ADMIN_EMAIL, "name": "Xavi (Supreme Admin) 👑", "role": "supreme", "rank_name": "Supreme", "message": "Admin authenticated."}
     return {"status": "error", "message": "Incorrect administrator password."}
 
 @app.get("/api/admin/users")
@@ -216,11 +225,10 @@ def admin_set_role(data: dict = Body(...)):
         
     if email in USER_STORE and role in ["user", "admin"]:
         USER_STORE[email]["role"] = role
-        # Auto-update rank title nicely when role changes
         if role == 'admin':
             USER_STORE[email]["rank_name"] = "Admin"
         else:
-            USER_STORE[email]["rank_name"] = "user"
+            USER_STORE[email]["rank_name"] = "peasant"
         save_users(USER_STORE)
         return {"status": "success", "message": f"Updated role for {email} to {role}."}
     return {"status": "error", "message": "User not found or invalid role."}
