@@ -43,6 +43,14 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
         body { background-color: var(--bg-primary); color: var(--text-main); min-height: 100vh; overflow-x: hidden; }
 
+        /* Notice Banner */
+        #noticeBanner {
+            width: 100%; padding: 12px 24px; text-align: center; font-size: 13px; font-weight: 600;
+            display: none; justify-content: center; align-items: center; gap: 12px; z-index: 100000;
+            position: relative; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        #noticeBanner button { background: rgba(255,255,255,0.2); border: none; color: inherit; padding: 2px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; }
+
         #authScreen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: radial-gradient(circle at center, var(--bg-secondary) 0%, var(--bg-primary) 100%);
@@ -58,11 +66,11 @@
         .auth-header p { font-size: 13px; color: var(--text-muted); }
         .form-group { margin-bottom: 18px; }
         .form-group label { display: block; font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .auth-input, select.auth-input {
+        .auth-input, select.auth-input, textarea.auth-input {
             width: 100%; background: var(--bg-primary); border: 1px solid var(--border-color);
             padding: 12px 16px; border-radius: 8px; color: var(--text-main); font-size: 14px; transition: all 0.2s ease;
         }
-        .auth-input:focus, select.auth-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15); }
+        .auth-input:focus, select.auth-input:focus, textarea.auth-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15); }
         .auth-btn {
             width: 100%; background: var(--accent); color: white; border: none;
             padding: 12px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; margin-top: 10px; transition: background 0.2s;
@@ -228,6 +236,12 @@
 </head>
 <body>
 
+    <!-- Global Notice Banner -->
+    <div id="noticeBanner">
+        <span id="noticeBannerText"></span>
+        <button id="noticeDismissBtn" onclick="dismissNotice()" style="display: none;">Dismiss</button>
+    </div>
+
     <div id="authScreen">
         <div class="auth-card">
             <div class="auth-header">
@@ -252,8 +266,9 @@
         </div>
     </div>
 
+    <!-- Admin Panel Modal -->
     <div class="modal-overlay" id="adminModal">
-        <div class="modal-card">
+        <div class="modal-card" style="max-width: 850px;">
             <div class="modal-header">
                 <h3>Administrator Control Panel</h3>
                 <button class="close-modal" onclick="toggleModal('adminModal', false)">✕</button>
@@ -272,10 +287,60 @@
                     <div class="val" style="color: var(--success);">ONLINE</div>
                 </div>
             </div>
+
+            <!-- Notice Board Manager (Admins Only) -->
+            <div style="background: var(--bg-primary); border: 1px solid var(--border-color); padding: 20px; border-radius: 8px; margin-bottom: 24px;">
+                <h4 style="font-size: 14px; font-weight: 700; margin-bottom: 14px; color: var(--accent);">📢 Global Notice Banner Manager</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+                    <div class="form-group" style="margin: 0;">
+                        <label>Notice Status</label>
+                        <select id="noticeActiveSelect" class="auth-input">
+                            <option value="false">Disabled / Off</option>
+                            <option value="true">Active / Published</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin: 0;">
+                        <label>Display Mode</label>
+                        <select id="noticeModeSelect" class="auth-input" onchange="toggleNoticeModeFields()">
+                            <option value="same">Same Message for All</option>
+                            <option value="different">Different Public vs Logged-In</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label id="noticeMsg1Label">Notice Message</label>
+                    <textarea id="noticeMsgPublic" class="auth-input" rows="2" placeholder="Enter notice message..."></textarea>
+                </div>
+                <div class="form-group" id="noticeMsg2Group" style="margin-bottom: 14px; display: none;">
+                    <label>Notice Message (For Logged-In Users)</label>
+                    <textarea id="noticeMsgLogged" class="auth-input" rows="2" placeholder="Enter notice message for logged-in users..."></textarea>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+                    <div class="form-group" style="margin: 0;">
+                        <label>Behavior</label>
+                        <select id="noticeDismissibleSelect" class="auth-input">
+                            <option value="true">Dismissable by user</option>
+                            <option value="false">Permanent (Sticky)</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin: 0;">
+                        <label>Banner Color Theme</label>
+                        <select id="noticeColorSelect" class="auth-input">
+                            <option value="#0284c7">Blue (Info)</option>
+                            <option value="#10b981">Green (Success)</option>
+                            <option value="#f59e0b">Amber (Warning)</option>
+                            <option value="#ef4444">Red (Alert)</option>
+                            <option value="#71717a">Mono (Neutral)</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="auth-btn" style="margin: 0;" onclick="saveGlobalNotice()">Save & Publish Notice</button>
+            </div>
+
             <div style="font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">
                 Registered Personnel & Access Control
             </div>
-            <div style="max-height: 300px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 8px;">
+            <div style="max-height: 250px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 8px;">
                 <table class="user-table">
                     <thead>
                         <tr>
@@ -291,7 +356,7 @@
         </div>
     </div>
 
-    <!-- Flynn / User Override Modal -->
+    <!-- User Override Modal -->
     <div class="modal-overlay" id="overrideModal">
         <div class="modal-card" style="max-width: 450px;">
             <div class="modal-header">
@@ -463,12 +528,103 @@
         let currentUserRole = 'user';
         let currentRankName = 'user';
         let activeUsersCache = [];
+        let currentNoticeData = null;
         const SUPREME_ADMIN_EMAIL = "xottovaggs@gmail.com";
 
         const tooltip = document.getElementById('global-tooltip');
         const tooltipTitle = document.getElementById('tooltip-title');
         const tooltipDesc = document.getElementById('tooltip-desc');
         const tooltipCode = document.getElementById('tooltip-code');
+
+        window.addEventListener('DOMContentLoaded', () => {
+            fetchNoticeData();
+            setInterval(fetchNoticeData, 10000);
+        });
+
+        async function fetchNoticeData() {
+            try {
+                const res = await fetch('/api/notice');
+                const data = await res.json();
+                currentNoticeData = data;
+                renderNoticeBanner();
+            } catch(err) {}
+        }
+
+        function renderNoticeBanner() {
+            if (!currentNoticeData || !currentNoticeData.active) {
+                document.getElementById('noticeBanner').style.display = 'none';
+                return;
+            }
+
+            if (currentNoticeData.dismissible && sessionStorage.getItem('notice_dismissed') === 'true') {
+                document.getElementById('noticeBanner').style.display = 'none';
+                return;
+            }
+
+            let msg = currentNoticeData.msg_public;
+            if (currentNoticeData.mode === 'different' && currentUserEmail) {
+                msg = currentNoticeData.msg_logged || currentNoticeData.msg_public;
+            }
+
+            if (!msg) {
+                document.getElementById('noticeBanner').style.display = 'none';
+                return;
+            }
+
+            const banner = document.getElementById('noticeBanner');
+            banner.style.display = 'flex';
+            banner.style.background = currentNoticeData.color || '#0284c7';
+            banner.style.color = '#fff';
+            document.getElementById('noticeBannerText').textContent = msg;
+
+            const dismissBtn = document.getElementById('noticeDismissBtn');
+            dismissBtn.style.display = currentNoticeData.dismissible ? 'inline-block' : 'none';
+        }
+
+        function dismissNotice() {
+            sessionStorage.setItem('notice_dismissed', 'true');
+            document.getElementById('noticeBanner').style.display = 'none';
+        }
+
+        function toggleNoticeModeFields() {
+            const mode = document.getElementById('noticeModeSelect').value;
+            const msg2Group = document.getElementById('noticeMsg2Group');
+            const label1 = document.getElementById('noticeMsg1Label');
+            if (mode === 'different') {
+                msg2Group.style.display = 'block';
+                label1.textContent = "Notice Message (For Public / Logged Out)";
+            } else {
+                msg2Group.style.display = 'none';
+                label1.textContent = "Notice Message";
+            }
+        }
+
+        async function saveGlobalNotice() {
+            const active = document.getElementById('noticeActiveSelect').value === 'true';
+            const mode = document.getElementById('noticeModeSelect').value;
+            const msg_public = document.getElementById('noticeMsgPublic').value.trim();
+            const msg_logged = document.getElementById('noticeMsgLogged').value.trim();
+            const dismissible = document.getElementById('noticeDismissibleSelect').value === 'true';
+            const color = document.getElementById('noticeColorSelect').value;
+
+            try {
+                const res = await fetch('/api/admin/notice', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({email: currentUserEmail, active, mode, msg_public, msg_logged, dismissible, color})
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    currentNoticeData = data.notice;
+                    renderNoticeBanner();
+                    alert("Global notice published successfully!");
+                } else {
+                    alert(data.message);
+                }
+            } catch(err) {
+                alert("Connection error.");
+            }
+        }
 
         function toggleAuthMode() {
             isSignUpMode = !isSignUpMode;
@@ -508,6 +664,7 @@
                         document.getElementById('customRankNameInput').value = currentRankName;
                         setupAdminInterface();
                         initApp();
+                        renderNoticeBanner();
                         return;
                     }
                 } catch(err) {}
@@ -560,6 +717,7 @@
                             setupAdminInterface();
                         }
                         initApp();
+                        renderNoticeBanner();
                     } else {
                         errDiv.textContent = data.message;
                         errDiv.style.display = 'block';

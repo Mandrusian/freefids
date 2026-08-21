@@ -25,8 +25,9 @@ session = requests.Session()
 
 USER_FILE = "users.json"
 CHAT_FILE = "chats.json"
+NOTICE_FILE = "notices.json"
 
-ACTIVE_USERS = {} # email -> timestamp of last heartbeat
+ACTIVE_USERS = {}
 
 def load_users():
     default_users = {
@@ -34,7 +35,6 @@ def load_users():
         "cybernoxal@gmail.com": {"name": "Daniel Bestine", "chat_name": "Daniel", "status": "normal", "role": "admin", "rank_name": "Admin"},
         "s3592@plc.qld.edu.au": {"name": "Flynn Orme", "chat_name": "Flynn", "status": "normal", "role": "user", "rank_name": "peasant"}
     }
-    
     data = {}
     if os.path.exists(USER_FILE):
         try:
@@ -42,13 +42,10 @@ def load_users():
                 data = json.load(f)
         except Exception:
             pass
-            
     for email, info in default_users.items():
         if email not in data:
             data[email] = info
-            
     data[SUPREME_ADMIN_EMAIL] = {"name": "Xavi (Supreme Admin) 👑", "chat_name": "Xavi", "status": "normal", "role": "supreme", "rank_name": "Supreme"}
-    
     save_users(data)
     return data
 
@@ -76,8 +73,32 @@ def save_chats(chats):
     except Exception as e:
         print(f"Error saving chats: {e}")
 
+def load_notices():
+    if os.path.exists(NOTICE_FILE):
+        try:
+            with open(NOTICE_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {
+        "active": False,
+        "mode": "same", # 'same' or 'different'
+        "msg_public": "",
+        "msg_logged": "",
+        "dismissible": True,
+        "color": "#0284c7"
+    }
+
+def save_notices(notices):
+    try:
+        with open(NOTICE_FILE, "w", encoding="utf-8") as f:
+            json.dump(notices, f, indent=4)
+    except Exception as e:
+        print(f"Error saving notices: {e}")
+
 USER_STORE = load_users()
 CHAT_STORE = load_chats()
+NOTICE_STORE = load_notices()
 
 def authenticate_session():
     print("Authenticating with Cairns Airport FIDS...")
@@ -113,6 +134,32 @@ def serve_frontend():
             return f.read()
     except FileNotFoundError:
         return "<h1>index.html not found in repository root!</h1>"
+
+@app.get("/api/notice")
+def get_notice():
+    global NOTICE_STORE
+    NOTICE_STORE = load_notices()
+    return NOTICE_STORE
+
+@app.post("/api/admin/notice")
+def admin_set_notice(data: dict = Body(...)):
+    global NOTICE_STORE, USER_STORE
+    USER_STORE = load_users()
+    email = data.get("email", "").strip().lower()
+    
+    if email not in USER_STORE or USER_STORE[email].get("role") not in ["admin", "supreme"]:
+        return {"status": "error", "message": "Unauthorized."}
+        
+    NOTICE_STORE = {
+        "active": data.get("active", False),
+        "mode": data.get("mode", "same"),
+        "msg_public": data.get("msg_public", ""),
+        "msg_logged": data.get("msg_logged", ""),
+        "dismissible": data.get("dismissible", True),
+        "color": data.get("color", "#0284c7")
+    }
+    save_notices(NOTICE_STORE)
+    return {"status": "success", "notice": NOTICE_STORE}
 
 @app.post("/api/signup")
 def register_user(data: dict = Body(...)):
@@ -165,7 +212,6 @@ def heartbeat(data: dict = Body(...)):
     if email:
         ACTIVE_USERS[email] = datetime.now().timestamp()
         
-    # Clean inactive users (> 30 seconds old)
     now = datetime.now().timestamp()
     active_list = []
     for em, t in list(ACTIVE_USERS.items()):
@@ -295,8 +341,7 @@ def get_messages():
 
 @app.post("/api/chat/messages")
 def post_message(data: dict = Body(...)):
-    global CHAT_STORE
-    global USER_STORE
+    global CHAT_STORE, USER_STORE
     USER_STORE = load_users()
     CHAT_STORE = load_chats()
     
@@ -304,7 +349,6 @@ def post_message(data: dict = Body(...)):
     impersonate_email = data.get("impersonate_email", "").strip().lower()
     text = data.get("text", "").strip()
     
-    # Check if admin is impersonating someone else
     posting_email = email
     if impersonate_email and impersonate_email in USER_STORE and email in USER_STORE:
         if USER_STORE[email].get("role") in ["admin", "supreme"]:
