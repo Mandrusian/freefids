@@ -4,150 +4,214 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cairns Airport Flight Information Display System</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-primary: #07090e;
-            --bg-secondary: #0d1322;
-            --bg-card: #131b2e;
+            --bg-primary: #060911;
+            --bg-secondary: #0d121f;
+            --bg-card: #141c2e;
             --border-color: rgba(255, 255, 255, 0.08);
-            --border-hover: rgba(2, 132, 199, 0.4);
-            --text-main: #f1f5f9;
+            --border-hover: rgba(56, 189, 248, 0.4);
+            --text-main: #f8fafc;
             --text-muted: #94a3b8;
             --accent: #0284c7;
+            --accent-glow: rgba(2, 132, 199, 0.22);
             --accent-hover: #0369a1;
             --success: #10b981;
             --warning: #f59e0b;
             --danger: #ef4444;
-            --radius: 12px;
-            --shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            --radius: 10px;
+            --shadow: 0 12px 36px rgba(0, 0, 0, 0.6);
+            --fx-transition: none;
         }
 
-        body.theme-navy {
-            --bg-primary: #050b14;
-            --bg-secondary: #0f1c30;
-            --bg-card: #172842;
-            --accent: #3b82f6;
-            --accent-hover: #2563eb;
+        body.fx-enabled {
+            --fx-transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        body.theme-mono {
-            --bg-primary: #09090b;
-            --bg-secondary: #121215;
-            --bg-card: #1a1a1e;
-            --accent: #71717a;
-            --accent-hover: #52525b;
-            --success: #f4f4f5;
+        body.theme-amoled {
+            --bg-primary: #000000;
+            --bg-secondary: #08080a;
+            --bg-card: #101014;
+            --border-color: rgba(255, 255, 255, 0.12);
+            --border-hover: #38bdf8;
+            --text-main: #ffffff;
+            --text-muted: #a1a1aa;
+            --accent: #0284c7;
+            --accent-glow: rgba(56, 189, 248, 0.3);
+            --accent-hover: #0369a1;
+        }
+
+        body.theme-cyberpunk {
+            --bg-primary: #000000;
+            --bg-secondary: #0a0a0c;
+            --bg-card: #121216;
+            --border-color: rgba(245, 158, 11, 0.25);
+            --border-hover: #f59e0b;
+            --text-main: #fffbeb;
+            --text-muted: #a1a1aa;
+            --accent: #f59e0b;
+            --accent-glow: rgba(245, 158, 11, 0.3);
+            --accent-hover: #d97706;
+        }
+
+        body.theme-oceanic {
+            --bg-primary: #030a16;
+            --bg-secondary: #08162b;
+            --bg-card: #0f2342;
+            --border-color: rgba(56, 189, 248, 0.15);
+            --border-hover: #38bdf8;
+            --text-main: #f0f9ff;
+            --text-muted: #7dd3fc;
+            --accent: #0284c7;
+            --accent-glow: rgba(56, 189, 248, 0.3);
+            --accent-hover: #0369a1;
+        }
+
+        body.theme-nordic {
+            --bg-primary: #111318;
+            --bg-secondary: #1a1d24;
+            --bg-card: #222630;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --border-hover: #94a3b8;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --accent: #64748b;
+            --accent-glow: rgba(100, 116, 139, 0.25);
+            --accent-hover: #475569;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
         body { background-color: var(--bg-primary); color: var(--text-main); min-height: 100vh; overflow-x: hidden; }
 
-        /* Notice Banner */
-        #noticeBanner {
-            width: 100%; padding: 12px 24px; text-align: center; font-size: 13px; font-weight: 600;
-            display: none; justify-content: center; align-items: center; gap: 12px; z-index: 100000;
-            position: relative; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        /* Stacked Notices Engine */
+        #noticesContainer {
+            width: 100%; display: flex; flex-direction: column; gap: 2px;
+            position: sticky; top: 0; z-index: 99999; box-shadow: 0 4px 16px rgba(0,0,0,0.5);
         }
-        #noticeBanner button { background: rgba(255,255,255,0.2); border: none; color: inherit; padding: 2px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; }
+        .notice-bar {
+            width: 100%; padding: 10px 24px; font-size: 12px; font-weight: 600;
+            display: flex; justify-content: space-between; align-items: center; gap: 16px;
+            backdrop-filter: blur(8px);
+        }
+        body.fx-enabled .notice-bar { animation: slideDown 0.25s ease-out; }
+        @keyframes slideDown { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .notice-content { display: flex; align-items: center; gap: 10px; flex: 1; flex-wrap: wrap; }
+        .notice-tag { font-weight: 800; text-transform: uppercase; font-size: 10px; letter-spacing: 0.5px; padding: 2px 8px; background: rgba(0,0,0,0.3); border-radius: 4px; font-family: 'JetBrains Mono', monospace; }
+        .notice-btn-group { display: flex; gap: 6px; align-items: center; }
+        .notice-action-btn { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); color: inherit; padding: 3px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 700; transition: var(--fx-transition); }
+        .notice-action-btn:hover { background: rgba(255,255,255,0.2); }
+
+        #restorableNoticeDock {
+            position: fixed; bottom: 20px; left: 20px; z-index: 9000;
+            display: flex; flex-direction: column; gap: 8px;
+        }
+        .docked-notice-pill {
+            background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main);
+            padding: 8px 14px; border-radius: 20px; font-size: 11px; font-weight: 700;
+            display: flex; align-items: center; gap: 8px; cursor: pointer; box-shadow: var(--shadow); transition: var(--fx-transition);
+        }
+        .docked-notice-pill:hover { border-color: var(--accent); transform: translateY(-2px); }
 
         #authScreen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: radial-gradient(circle at center, var(--bg-secondary) 0%, var(--bg-primary) 100%);
-            display: flex; align-items: center; justify-content: center; z-index: 99999;
+            display: flex; align-items: center; justify-content: center; z-index: 9999;
         }
         .auth-card {
             background: var(--bg-card); border: 1px solid var(--border-color);
             padding: 40px; border-radius: var(--radius); width: 100%; max-width: 420px;
-            box-shadow: var(--shadow); backdrop-filter: blur(10px);
+            box-shadow: var(--shadow); backdrop-filter: blur(12px);
         }
         .auth-header { margin-bottom: 24px; text-align: left; }
-        .auth-header h2 { font-size: 22px; font-weight: 700; color: var(--text-main); margin-bottom: 6px; letter-spacing: -0.5px; }
+        .auth-header h2 { font-size: 22px; font-weight: 800; color: var(--text-main); margin-bottom: 6px; letter-spacing: -0.5px; }
         .auth-header p { font-size: 13px; color: var(--text-muted); }
         .form-group { margin-bottom: 18px; }
-        .form-group label { display: block; font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .form-group label { display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
         .auth-input, select.auth-input, textarea.auth-input {
             width: 100%; background: var(--bg-primary); border: 1px solid var(--border-color);
-            padding: 12px 16px; border-radius: 8px; color: var(--text-main); font-size: 14px; transition: all 0.2s ease;
+            padding: 12px 16px; border-radius: 6px; color: var(--text-main); font-size: 13px; transition: var(--fx-transition);
         }
-        .auth-input:focus, select.auth-input:focus, textarea.auth-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15); }
+        .auth-input:focus, select.auth-input:focus, textarea.auth-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
         .auth-btn {
             width: 100%; background: var(--accent); color: white; border: none;
-            padding: 12px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; margin-top: 10px; transition: background 0.2s;
+            padding: 12px; border-radius: 6px; font-weight: 700; font-size: 13px; cursor: pointer; margin-top: 10px; transition: var(--fx-transition);
         }
         .auth-btn:hover { background: var(--accent-hover); }
         .auth-footer { margin-top: 24px; text-align: center; font-size: 13px; color: var(--text-muted); cursor: pointer; }
-        .auth-footer span { color: var(--accent); font-weight: 600; }
+        .auth-footer span { color: var(--accent); font-weight: 700; }
         .auth-error {
             background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2);
-            color: var(--danger); font-size: 13px; padding: 12px; border-radius: 8px; margin-bottom: 20px; display: none;
+            color: var(--danger); font-size: 12px; padding: 12px; border-radius: 6px; margin-bottom: 20px; display: none;
         }
 
         #appContainer { display: none; }
 
         #chatDrawer {
-            position: fixed; right: -400px; top: 0; width: 400px; height: 100%;
+            position: fixed; right: -420px; top: 0; width: 420px; height: 100%;
             background: var(--bg-secondary); border-left: 1px solid var(--border-color);
             z-index: 2000; display: flex; flex-direction: column; transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1);
             box-shadow: -15px 0 40px rgba(0,0,0,0.6);
         }
         #chatDrawer.open { right: 0; }
         .chat-header { padding: 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: var(--bg-card); }
-        .chat-header h3 { font-size: 15px; font-weight: 600; letter-spacing: -0.3px; }
-        .chat-body { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; background: var(--bg-primary); }
-        .chat-msg { background: var(--bg-card); border: 1px solid var(--border-color); padding: 12px 14px; border-radius: 10px; font-size: 13px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); position: relative; }
+        .chat-header h3 { font-size: 14px; font-weight: 700; letter-spacing: -0.3px; }
+        .chat-body { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; background: var(--bg-primary); }
+        .chat-msg { background: var(--bg-card); border: 1px solid var(--border-color); padding: 12px 14px; border-radius: 8px; font-size: 13px; position: relative; transition: var(--fx-transition); }
+        body.fx-enabled .chat-msg:hover { border-color: var(--border-hover); }
         .chat-msg-header { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 11px; }
-        .chat-msg-sender { font-weight: 700; font-family: 'JetBrains Mono', monospace; }
-        .chat-msg-time { color: var(--text-muted); }
+        .chat-msg-sender { font-weight: 700; font-family: 'JetBrains Mono', monospace; cursor: pointer; }
+        .chat-msg-sender:hover { text-decoration: underline; }
+        .chat-msg-time { color: var(--text-muted); font-size: 10px; }
         .chat-msg-text { color: var(--text-main); word-break: break-word; line-height: 1.4; margin-bottom: 8px; }
         
         .chat-reactions-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
-        .reaction-pill { background: var(--bg-primary); border: 1px solid var(--border-color); padding: 2px 8px; border-radius: 12px; font-size: 11px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
+        .reaction-pill { background: var(--bg-primary); border: 1px solid var(--border-color); padding: 2px 8px; border-radius: 12px; font-size: 11px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: var(--fx-transition); }
         .reaction-pill:hover { border-color: var(--accent); }
         .chat-tools { display: flex; gap: 6px; margin-top: 6px; align-items: center; }
-        .emoji-picker-btn { background: transparent; border: none; cursor: pointer; font-size: 14px; opacity: 0.7; }
-        .emoji-picker-btn:hover { opacity: 1; }
+        .glyph-btn { background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 12px; font-family: 'JetBrains Mono', monospace; padding: 2px 4px; transition: var(--fx-transition); }
+        .glyph-btn:hover { color: var(--accent); }
 
         .chat-footer { padding: 16px; border-top: 1px solid var(--border-color); background: var(--bg-card); display: flex; flex-direction: column; gap: 10px; }
         .chat-input-row { display: flex; gap: 8px; }
-        .chat-input-row input { flex: 1; background: var(--bg-primary); border: 1px solid var(--border-color); padding: 10px 14px; border-radius: 8px; color: var(--text-main); font-size: 13px; }
+        .chat-input-row input { flex: 1; background: var(--bg-primary); border: 1px solid var(--border-color); padding: 10px 14px; border-radius: 6px; color: var(--text-main); font-size: 13px; }
         .chat-input-row input:focus { outline: none; border-color: var(--accent); }
 
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(5, 7, 12, 0.75); backdrop-filter: blur(6px);
+            background: rgba(5, 7, 12, 0.85); backdrop-filter: blur(8px);
             display: flex; align-items: center; justify-content: center; z-index: 10000;
-            opacity: 0; visibility: hidden; transition: all 0.25s ease;
+            opacity: 0; visibility: hidden; transition: opacity 0.2s ease, visibility 0.2s ease;
         }
         .modal-overlay.active { opacity: 1; visibility: visible; }
         .modal-card {
             background: var(--bg-card); border: 1px solid var(--border-color);
-            border-radius: var(--radius); width: 90%; max-width: 800px; padding: 32px;
-            box-shadow: var(--shadow);
+            border-radius: var(--radius); width: 90%; max-width: 850px; padding: 28px;
+            box-shadow: var(--shadow); max-height: 90vh; overflow-y: auto;
         }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 1px solid var(--border-color); padding-bottom: 16px; }
-        .modal-header h3 { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
-        .close-modal { background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: var(--text-muted); width: 32px; height: 32px; border-radius: 6px; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 14px; }
+        .modal-header h3 { font-size: 16px; font-weight: 800; letter-spacing: -0.3px; }
+        .close-modal { background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: var(--text-muted); width: 30px; height: 30px; border-radius: 6px; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: var(--fx-transition); }
         .close-modal:hover { background: rgba(255,255,255,0.1); color: var(--text-main); }
 
-        .admin-stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
-        .admin-stat-card { background: var(--bg-primary); border: 1px solid var(--border-color); padding: 18px; border-radius: 10px; }
-        .admin-stat-card .lbl { font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
-        .admin-stat-card .val { font-size: 24px; font-weight: 700; color: var(--text-main); margin-top: 6px; }
+        .admin-stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
+        .admin-stat-card { background: var(--bg-primary); border: 1px solid var(--border-color); padding: 16px; border-radius: 8px; }
+        .admin-stat-card .lbl { font-size: 10px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
+        .admin-stat-card .val { font-size: 22px; font-weight: 800; color: var(--text-main); margin-top: 4px; font-family: 'JetBrains Mono', monospace; }
 
         .user-table { width: 100%; border-collapse: collapse; }
-        .user-table th { text-align: left; font-size: 11px; color: var(--text-muted); padding: 12px 16px; border-bottom: 1px solid var(--border-color); font-family: 'JetBrains Mono', monospace; text-transform: uppercase; }
-        .user-table td { padding: 14px 16px; border-bottom: 1px solid var(--border-color); font-size: 13px; }
-        .status-badge { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; text-transform: uppercase; font-family: 'JetBrains Mono', monospace; }
+        .user-table th { text-align: left; font-size: 10px; color: var(--text-muted); padding: 10px 14px; border-bottom: 1px solid var(--border-color); font-family: 'JetBrains Mono', monospace; text-transform: uppercase; }
+        .user-table td { padding: 12px 14px; border-bottom: 1px solid var(--border-color); font-size: 12px; }
+        .status-badge { padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase; font-family: 'JetBrains Mono', monospace; }
         .badge-normal { background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16,185,129,0.2); }
         .badge-pending { background: rgba(245, 158, 11, 0.1); color: var(--warning); border: 1px solid rgba(245,158,11,0.2); }
         .badge-suspended { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239,68,68,0.2); }
-        .badge-supreme { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); }
-        .badge-admin { background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168,85,247,0.3); }
+        .badge-supreme { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56,189,248,0.3); }
+        .badge-admin { background: rgba(192, 132, 252, 0.15); color: #c084fc; border: 1px solid rgba(192,132,252,0.3); }
 
         .btn-sm {
-            padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 600;
-            border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-main); cursor: pointer; transition: all 0.2s;
+            padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 700;
+            border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-main); cursor: pointer; transition: var(--fx-transition);
         }
         .btn-sm:hover { background: rgba(255,255,255,0.08); border-color: var(--accent); }
         .btn-danger { color: var(--danger); border-color: rgba(239,68,68,0.3); }
@@ -157,90 +221,104 @@
 
         header {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 20px 36px; background: var(--bg-secondary); border-bottom: 1px solid var(--border-color);
+            padding: 16px 32px; background: var(--bg-secondary); border-bottom: 1px solid var(--border-color);
             position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         }
-        .brand { display: flex; align-items: center; gap: 14px; }
-        .logo-icon { width: 40px; height: 40px; background: var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3); }
-        .brand-text h1 { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; }
-        .brand-text p { font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; margin-top: 2px; }
+        .brand { display: flex; align-items: center; gap: 12px; }
+        .logo-icon { width: 36px; height: 36px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800; font-family: 'JetBrains Mono', monospace; box-shadow: 0 4px 16px var(--accent-glow); }
+        .brand-text h1 { font-size: 16px; font-weight: 800; letter-spacing: -0.3px; }
+        .brand-text p { font-size: 10px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; margin-top: 1px; }
 
-        .header-actions { display: flex; align-items: center; gap: 12px; }
+        .header-actions { display: flex; align-items: center; gap: 10px; }
         .hud-badge {
             background: var(--bg-primary); border: 1px solid var(--border-color);
-            padding: 8px 14px; border-radius: 8px; display: flex; flex-direction: column; align-items: flex-end;
+            padding: 6px 12px; border-radius: 6px; display: flex; flex-direction: column; align-items: flex-end;
             cursor: default;
         }
-        .hud-badge .label { font-size: 9px; color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
-        .hud-badge .value { font-size: 14px; font-weight: 700; color: var(--text-main); font-family: 'JetBrains Mono', monospace; margin-top: 2px; }
+        .hud-badge .label { font-size: 9px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
+        .hud-badge .value { font-size: 13px; font-weight: 800; color: var(--text-main); font-family: 'JetBrains Mono', monospace; margin-top: 1px; }
 
         .icon-btn {
             background: var(--bg-primary); border: 1px solid var(--border-color); color: var(--text-main);
-            width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;
+            width: 38px; height: 38px; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: var(--fx-transition);
+            font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700;
         }
-        .icon-btn:hover { border-color: var(--accent); background: rgba(2, 132, 199, 0.1); }
+        .icon-btn:hover { border-color: var(--accent); background: var(--accent-glow); }
 
-        .container { max-width: 1440px; margin: 32px auto; padding: 0 36px; }
-        .controls-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; gap: 16px; flex-wrap: wrap; }
+        .container { max-width: 1440px; margin: 28px auto; padding: 0 32px; }
+        .controls-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 14px; flex-wrap: wrap; }
         .search-box { position: relative; flex: 1; min-width: 280px; }
         .search-box input {
             width: 100%; background: var(--bg-secondary); border: 1px solid var(--border-color);
-            padding: 12px 16px 12px 42px; border-radius: 8px; color: var(--text-main); font-size: 13px; transition: all 0.2s;
+            padding: 10px 14px 10px 38px; border-radius: 6px; color: var(--text-main); font-size: 13px; transition: var(--fx-transition);
         }
-        .search-box input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15); }
-        .search-box svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); width: 16px; height: 16px; }
+        .search-box input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+        .search-box .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 12px; font-family: 'JetBrains Mono', monospace; }
 
-        .actions-group { display: flex; gap: 10px; align-items: center; }
-        .filter-tabs { display: flex; gap: 4px; background: var(--bg-secondary); padding: 4px; border-radius: 8px; border: 1px solid var(--border-color); }
-        .tab-btn { background: transparent; border: none; color: var(--text-muted); padding: 8px 14px; font-size: 12px; font-weight: 600; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
+        .actions-group { display: flex; gap: 8px; align-items: center; }
+        .filter-tabs { display: flex; gap: 2px; background: var(--bg-secondary); padding: 3px; border-radius: 6px; border: 1px solid var(--border-color); }
+        .tab-btn { background: transparent; border: none; color: var(--text-muted); padding: 6px 12px; font-size: 11px; font-weight: 700; border-radius: 4px; cursor: pointer; transition: var(--fx-transition); }
         .tab-btn.active, .tab-btn:hover { background: var(--accent); color: white; }
 
         .action-btn {
             background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-main);
-            padding: 10px 16px; font-size: 12px; font-weight: 600; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s;
+            padding: 8px 14px; font-size: 11px; font-weight: 700; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: var(--fx-transition);
         }
-        .action-btn:hover { border-color: var(--accent); background: rgba(2, 132, 199, 0.08); }
+        .action-btn:hover { border-color: var(--accent); background: var(--accent-glow); }
 
         .table-wrapper { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
         table { width: 100%; border-collapse: collapse; text-align: left; }
-        th { background: rgba(0,0,0,0.25); padding: 16px 20px; font-size: 11px; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--border-color); letter-spacing: 0.5px; }
-        td { padding: 16px 20px; border-bottom: 1px solid var(--border-color); font-size: 13px; }
+        th { background: rgba(0,0,0,0.3); padding: 14px 18px; font-size: 10px; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--border-color); letter-spacing: 0.5px; }
+        td { padding: 14px 18px; border-bottom: 1px solid var(--border-color); font-size: 12px; }
+        tbody tr { transition: var(--fx-transition); }
         tbody tr:hover { background: rgba(255,255,255,0.02); }
-        tbody tr.rare-military-row { background: rgba(239, 68, 68, 0.06) !important; border-left: 3px solid var(--danger); }
+        tbody tr.rare-military-row { background: rgba(239, 68, 68, 0.08) !important; border-left: 3px solid var(--danger); }
 
         #global-tooltip {
             position: fixed; background: var(--bg-card); border: 1px solid var(--border-color);
-            padding: 12px 16px; border-radius: 8px; width: 260px; box-shadow: var(--shadow);
+            padding: 12px 16px; border-radius: 8px; width: 280px; box-shadow: var(--shadow);
             opacity: 0; visibility: hidden; transition: opacity 0.15s ease; z-index: 99999; pointer-events: none;
         }
         #global-tooltip.visible { opacity: 1; visibility: visible; }
-        #global-tooltip h4 { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+        #global-tooltip h4 { font-size: 12px; font-weight: 800; margin-bottom: 4px; }
         #global-tooltip p { font-size: 11px; color: var(--text-muted); line-height: 1.4; }
 
         .tooltip-trigger { cursor: help; border-bottom: 1px dashed var(--text-muted); }
-        .flight-code { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--accent); }
-        .rego-code { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--success); background: rgba(16,185,129,0.1); padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(16,185,129,0.2); }
-        .time-box { font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+        .flight-code { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--accent); }
+        .rego-code { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--success); background: rgba(16,185,129,0.1); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(16,185,129,0.2); }
+        .time-box { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
         .date-sub { font-size: 10px; color: var(--text-muted); display: block; margin-top: 2px; }
-        .time-est { color: var(--warning); font-size: 11px; display: block; margin-top: 2px; }
+        .time-est { color: var(--warning); font-size: 10px; display: block; margin-top: 2px; }
 
-        .status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; font-family: 'JetBrains Mono', monospace; }
+        .status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 4px; font-size: 10px; font-weight: 800; text-transform: uppercase; font-family: 'JetBrains Mono', monospace; }
         .status-on-time { background: rgba(16, 185, 129, 0.12); color: var(--success); border: 1px solid rgba(16,185,129,0.25); }
         .status-delayed { background: rgba(245, 158, 11, 0.12); color: var(--warning); border: 1px solid rgba(245,158,11,0.25); }
         .status-neutral { background: rgba(255, 255, 255, 0.05); color: var(--text-muted); border: 1px solid var(--border-color); }
 
+        .admin-notice-item { background: var(--bg-primary); border: 1px solid var(--border-color); padding: 12px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 8px; }
+
+        .profile-card-body { text-align: center; padding: 10px 0; }
+        .profile-avatar-large { font-size: 32px; font-family: 'JetBrains Mono', monospace; width: 64px; height: 64px; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto; color: var(--accent); }
+
+        .switch { position: relative; display: inline-block; width: 38px; height: 20px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--bg-primary); border: 1px solid var(--border-color); transition: .2s; border-radius: 20px; }
+        .slider:before { position: absolute; content: ""; height: 12px; width: 12px; left: 3px; bottom: 3px; background-color: var(--text-muted); transition: .2s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--accent); }
+        input:checked + .slider:before { transform: translateX(18px); background-color: #fff; }
+
         .state-container { text-align: center; padding: 60px 20px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
-        .spinner { width: 36px; height: 36px; border: 3px solid var(--border-color); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px auto; }
+        .spinner { width: 32px; height: 32px; border: 3px solid var(--border-color); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px auto; }
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
-<body>
+<body class="fx-enabled">
 
-    <!-- Global Notice Banner -->
-    <div id="noticeBanner">
-        <span id="noticeBannerText"></span>
-        <button id="noticeDismissBtn" onclick="dismissNotice()" style="display: none;">Dismiss</button>
-    </div>
+    <!-- Stacked Notices Container -->
+    <div id="noticesContainer"></div>
+
+    <!-- Restorable Notices Dock -->
+    <div id="restorableNoticeDock"></div>
 
     <div id="authScreen">
         <div class="auth-card">
@@ -252,7 +330,7 @@
             <form id="authForm" onsubmit="handleAuthSubmit(event)">
                 <div class="form-group" id="nameFieldContainer" style="display: none;">
                     <label>Full Name</label>
-                    <input type="text" id="authName" class="auth-input" placeholder="Enter your name">
+                    <input type="text" id="authName" class="auth-input" placeholder="Enter full name">
                 </div>
                 <div class="form-group">
                     <label>Email Address</label>
@@ -266,9 +344,38 @@
         </div>
     </div>
 
+    <!-- User Public Profile Modal -->
+    <div class="modal-overlay" id="userProfileModal">
+        <div class="modal-card" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3>Personnel Profile</h3>
+                <button class="close-modal" onclick="toggleModal('userProfileModal', false)">✕</button>
+            </div>
+            <div class="profile-card-body">
+                <div class="profile-avatar-large" id="profAvatar">■</div>
+                <h4 id="profName" style="font-size: 16px; font-weight: 800;">---</h4>
+                <p id="profRank" style="font-size: 11px; color: var(--accent); font-family: 'JetBrains Mono', monospace; font-weight: 700; margin-top: 2px;">PEASANT</p>
+                <p id="profEmail" style="font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; margin-top: 2px;">---</p>
+                <div style="background: var(--bg-primary); border: 1px solid var(--border-color); padding: 12px; border-radius: 6px; margin: 16px 0; text-align: left; font-size: 12px; color: var(--text-main);" id="profBio">
+                    ---
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 11px; text-align: left;">
+                    <div style="background: var(--bg-primary); padding: 8px; border-radius: 6px; border: 1px solid var(--border-color);">
+                        <span style="color: var(--text-muted); display: block; font-size: 9px; uppercase;">Cleared Since</span>
+                        <strong id="profCreated" style="font-family: 'JetBrains Mono', monospace;">2026-01-01</strong>
+                    </div>
+                    <div style="background: var(--bg-primary); padding: 8px; border-radius: 6px; border: 1px solid var(--border-color);">
+                        <span style="color: var(--text-muted); display: block; font-size: 9px; uppercase;">Chat Messages</span>
+                        <strong id="profMsgs" style="font-family: 'JetBrains Mono', monospace;">0</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Admin Panel Modal -->
     <div class="modal-overlay" id="adminModal">
-        <div class="modal-card" style="max-width: 850px;">
+        <div class="modal-card">
             <div class="modal-header">
                 <h3>Administrator Control Panel</h3>
                 <button class="close-modal" onclick="toggleModal('adminModal', false)">✕</button>
@@ -284,69 +391,101 @@
                 </div>
                 <div class="admin-stat-card">
                     <div class="lbl">System Status</div>
-                    <div class="val" style="color: var(--success);">ONLINE</div>
+                    <div class="val" id="statSysMode" style="color: var(--success);">ONLINE</div>
                 </div>
             </div>
 
-            <!-- Notice Board Manager (Admins Only) -->
-            <div style="background: var(--bg-primary); border: 1px solid var(--border-color); padding: 20px; border-radius: 8px; margin-bottom: 24px;">
-                <h4 style="font-size: 14px; font-weight: 700; margin-bottom: 14px; color: var(--accent);">📢 Global Notice Banner Manager</h4>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
-                    <div class="form-group" style="margin: 0;">
-                        <label>Notice Status</label>
-                        <select id="noticeActiveSelect" class="auth-input">
-                            <option value="false">Disabled / Off</option>
-                            <option value="true">Active / Published</option>
-                        </select>
-                    </div>
-                    <div class="form-group" style="margin: 0;">
-                        <label>Display Mode</label>
-                        <select id="noticeModeSelect" class="auth-input" onchange="toggleNoticeModeFields()">
-                            <option value="same">Same Message for All</option>
-                            <option value="different">Different Public vs Logged-In</option>
-                        </select>
-                    </div>
+            <!-- Admin Ops Switchboard -->
+            <div style="background: var(--bg-primary); border: 1px solid var(--border-color); padding: 16px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; gap: 16px;">
+                <div>
+                    <strong style="font-size: 13px; font-weight: 700; display: block;">System Maintenance Mode</strong>
+                    <span style="font-size: 11px; color: var(--text-muted);">Restricts access for non-admin accounts.</span>
                 </div>
-                <div class="form-group" style="margin-bottom: 14px;">
-                    <label id="noticeMsg1Label">Notice Message</label>
-                    <textarea id="noticeMsgPublic" class="auth-input" rows="2" placeholder="Enter notice message..."></textarea>
-                </div>
-                <div class="form-group" id="noticeMsg2Group" style="margin-bottom: 14px; display: none;">
-                    <label>Notice Message (For Logged-In Users)</label>
-                    <textarea id="noticeMsgLogged" class="auth-input" rows="2" placeholder="Enter notice message for logged-in users..."></textarea>
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
-                    <div class="form-group" style="margin: 0;">
-                        <label>Behavior</label>
-                        <select id="noticeDismissibleSelect" class="auth-input">
-                            <option value="true">Dismissable by user</option>
-                            <option value="false">Permanent (Sticky)</option>
-                        </select>
-                    </div>
-                    <div class="form-group" style="margin: 0;">
-                        <label>Banner Color Theme</label>
-                        <select id="noticeColorSelect" class="auth-input">
-                            <option value="#0284c7">Blue (Info)</option>
-                            <option value="#10b981">Green (Success)</option>
-                            <option value="#f59e0b">Amber (Warning)</option>
-                            <option value="#ef4444">Red (Alert)</option>
-                            <option value="#71717a">Mono (Neutral)</option>
-                        </select>
-                    </div>
-                </div>
-                <button class="auth-btn" style="margin: 0;" onclick="saveGlobalNotice()">Save & Publish Notice</button>
+                <label class="switch">
+                    <input type="checkbox" id="maintToggle" onchange="toggleMaintenanceMode(this.checked)">
+                    <span class="slider"></span>
+                </label>
             </div>
 
-            <div style="font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">
-                Registered Personnel & Access Control
+            <!-- Custom Flight Injection Form -->
+            <div style="background: var(--bg-primary); border: 1px solid var(--border-color); padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+                <h4 style="font-size: 12px; font-weight: 800; margin-bottom: 12px; color: var(--accent); text-transform: uppercase;">Manual Flight Telemetry Injection</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                    <input type="text" id="injAirline" class="auth-input" placeholder="Airline (e.g. VIP)" style="padding: 8px;">
+                    <input type="text" id="injFlightNum" class="auth-input" placeholder="Flight #" style="padding: 8px;">
+                    <input type="text" id="injAcType" class="auth-input" placeholder="ICAO (e.g. GLF6)" style="padding: 8px;">
+                    <input type="text" id="injAcRego" class="auth-input" placeholder="Rego (e.g. N1VIP)" style="padding: 8px;">
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                    <input type="text" id="injPort" class="auth-input" placeholder="Port Name (e.g. Sydney)" style="padding: 8px;">
+                    <input type="text" id="injIATA" class="auth-input" placeholder="IATA (e.g. SYD)" style="padding: 8px;">
+                    <select id="injVector" class="auth-input" style="padding: 8px;">
+                        <option value="A">Arrival</option>
+                        <option value="D">Departure</option>
+                    </select>
+                </div>
+                <button class="btn-sm btn-primary-admin" onclick="injectCustomFlight()">Inject Telemetry Record</button>
             </div>
-            <div style="max-height: 250px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 8px;">
+
+            <!-- Stacked Notices Manager -->
+            <div style="background: var(--bg-primary); border: 1px solid var(--border-color); padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+                <h4 style="font-size: 12px; font-weight: 800; margin-bottom: 12px; color: var(--accent); text-transform: uppercase;">Notice Stack Manager</h4>
+                
+                <div id="adminNoticesList" style="margin-bottom: 12px;"></div>
+
+                <div style="border-top: 1px dashed var(--border-color); padding-top: 12px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                        <div class="form-group" style="margin: 0;">
+                            <label>Audience Target</label>
+                            <select id="noticeTargetSelect" class="auth-input">
+                                <option value="all">Everyone</option>
+                                <option value="logged_in">Logged-In Only</option>
+                                <option value="logged_out">Logged-Out Only</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin: 0;">
+                            <label>Notice Category Tag</label>
+                            <input type="text" id="noticeTitleInput" class="auth-input" placeholder="e.g. ADVISORY">
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 10px;">
+                        <label>Notice Text</label>
+                        <textarea id="noticeMsgInput" class="auth-input" rows="2" placeholder="Notice content..."></textarea>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+                        <div class="form-group" style="margin: 0;">
+                            <label>Behavior</label>
+                            <select id="noticeBehaviorSelect" class="auth-input">
+                                <option value="dismissible">Dismissible</option>
+                                <option value="sticky">Sticky (Permanent)</option>
+                                <option value="hidden">Hidden (Restorable Dock)</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin: 0;">
+                            <label>Color</label>
+                            <select id="noticeColorSelect" class="auth-input">
+                                <option value="#0284c7">Blue (Info)</option>
+                                <option value="#10b981">Green (Ops)</option>
+                                <option value="#f59e0b">Amber (Warning)</option>
+                                <option value="#ef4444">Red (Emergency)</option>
+                                <option value="#64748b">Slate (Neutral)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="auth-btn" style="margin: 0; padding: 10px;" onclick="addStackedNotice()">Publish Notice</button>
+                </div>
+            </div>
+
+            <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;">
+                Personnel Roster & Clearance
+            </div>
+            <div style="max-height: 220px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 6px;">
                 <table class="user-table">
                     <thead>
                         <tr>
-                            <th>User Name</th>
-                            <th>Email Address</th>
-                            <th>Rank & Status</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Status / Mute</th>
                             <th style="text-align: right;">Actions</th>
                         </tr>
                     </thead>
@@ -358,7 +497,7 @@
 
     <!-- User Override Modal -->
     <div class="modal-overlay" id="overrideModal">
-        <div class="modal-card" style="max-width: 450px;">
+        <div class="modal-card" style="max-width: 420px;">
             <div class="modal-header">
                 <h3 id="overrideModalTitle">Control Account</h3>
                 <button class="close-modal" onclick="toggleModal('overrideModal', false)">✕</button>
@@ -368,54 +507,66 @@
                 <label>Full Name</label>
                 <input type="text" id="overrideName" class="auth-input">
             </div>
-            <div class="form-group" style="margin-top: 16px;">
+            <div class="form-group" style="margin-top: 14px;">
                 <label>Chat Display Name</label>
                 <input type="text" id="overrideChatName" class="auth-input">
             </div>
-            <div class="form-group" style="margin-top: 16px;">
-                <label>Rank Title (e.g. peasant, VIP)</label>
+            <div class="form-group" style="margin-top: 14px;">
+                <label>Rank Title</label>
                 <input type="text" id="overrideRankName" class="auth-input">
             </div>
-            <div style="display: flex; gap: 10px; margin-top: 24px;">
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
                 <button class="auth-btn" style="margin: 0;" onclick="saveUserOverride()">Save Changes</button>
             </div>
         </div>
     </div>
 
     <div class="modal-overlay" id="settingsModal">
-        <div class="modal-card" style="max-width: 420px;">
+        <div class="modal-card" style="max-width: 440px;">
             <div class="modal-header">
                 <h3>Interface Preferences</h3>
                 <button class="close-modal" onclick="toggleModal('settingsModal', false)">✕</button>
             </div>
             <div class="form-group">
                 <label>Theme Preset</label>
-                <div style="display: flex; gap: 8px; margin-top: 8px;">
-                    <button class="tab-btn active" style="flex:1;" onclick="setTheme('default', this)">Default</button>
-                    <button class="tab-btn" style="flex:1;" onclick="setTheme('navy', this)">Navy</button>
-                    <button class="tab-btn" style="flex:1;" onclick="setTheme('mono', this)">Mono</button>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px;">
+                    <button class="tab-btn active" onclick="setTheme('default', this)">Midnight</button>
+                    <button class="tab-btn" onclick="setTheme('amoled', this)">AMOLED Black</button>
+                    <button class="tab-btn" onclick="setTheme('cyberpunk', this)">Cyberpunk</button>
+                    <button class="tab-btn" onclick="setTheme('oceanic', this)">Oceanic</button>
                 </div>
             </div>
-            <div class="form-group" style="margin-top: 20px;">
-                <label>Custom Chat Username</label>
-                <div style="display: flex; gap: 8px; margin-top: 8px;">
-                    <input type="text" id="customChatNameInput" class="auth-input" placeholder="Set your chat username">
-                    <button class="btn-sm btn-primary-admin" onclick="saveProfileChanges()">Save</button>
+
+            <div style="background: var(--bg-primary); border: 1px solid var(--border-color); padding: 12px; border-radius: 6px; margin-top: 16px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <strong style="font-size: 12px; font-weight: 700; display: block;">Full High-FX Motion</strong>
+                    <span style="font-size: 10px; color: var(--text-muted);">Enable smooth visual transitions & animations.</span>
                 </div>
+                <label class="switch">
+                    <input type="checkbox" id="fxToggle" checked onchange="toggleFxMode(this.checked)">
+                    <span class="slider"></span>
+                </label>
             </div>
-            <div class="form-group" style="margin-top: 20px;" id="rankNameGroup">
-                <label>Custom Rank / Title</label>
-                <div style="display: flex; gap: 8px; margin-top: 8px;">
-                    <input type="text" id="customRankNameInput" class="auth-input" placeholder="Set your rank title">
-                    <button class="btn-sm btn-primary-admin" onclick="saveProfileChanges()">Save</button>
-                </div>
+
+            <div class="form-group" style="margin-top: 16px;">
+                <label>Chat Display Name</label>
+                <input type="text" id="customChatNameInput" class="auth-input" placeholder="Display name">
             </div>
+            <div class="form-group" style="margin-top: 12px;">
+                <label>Avatar Symbol (Unicode Glyph)</label>
+                <input type="text" id="customAvatarInput" class="auth-input" placeholder="e.g. ■, ▲, ◈">
+            </div>
+            <div class="form-group" style="margin-top: 12px;">
+                <label>Profile Bio</label>
+                <textarea id="customBioInput" class="auth-input" rows="2" placeholder="Bio description..."></textarea>
+            </div>
+            <button class="auth-btn" style="margin-top: 12px;" onclick="saveProfileChanges()">Save Profile Preferences</button>
         </div>
     </div>
 
     <div id="chatDrawer">
         <div class="chat-header">
-            <h3>Airport Live Discussion</h3>
+            <h3>Airport Discussion Stream</h3>
             <div style="display: flex; gap: 8px; align-items: center;">
                 <button class="btn-sm" id="clearChatBtn" onclick="clearChatMessages()" style="display: none; background: rgba(239,68,68,0.15); color: var(--danger);">Clear Chat</button>
                 <button class="close-modal" onclick="toggleChatDrawer()">✕</button>
@@ -424,7 +575,7 @@
         <div class="chat-body" id="chatMessageContainer"></div>
         <div class="chat-footer">
             <div id="impersonateContainer" style="display: none; background: var(--bg-primary); padding: 8px; border-radius: 6px; border: 1px dashed var(--accent); font-size: 11px;">
-                <span style="color: var(--warning); font-weight: 600;">Admin Impersonation Mode:</span>
+                <span style="color: var(--warning); font-weight: 700;">Admin Impersonation Mode:</span>
                 <select id="impersonateSelect" class="auth-input" style="margin-top: 4px; padding: 6px; font-size: 12px;">
                     <option value="">Posting as yourself</option>
                 </select>
@@ -442,15 +593,15 @@
         <div id="global-tooltip">
             <h4 id="tooltip-title"></h4>
             <p id="tooltip-desc"></p>
-            <div id="tooltip-code" style="margin-top: 6px; font-size: 10px; color: var(--accent); font-family: 'JetBrains Mono', monospace;"></div>
+            <div id="tooltip-code" style="margin-top: 4px; font-size: 10px; color: var(--accent); font-family: 'JetBrains Mono', monospace;"></div>
         </div>
 
         <header>
             <div class="brand">
-                <div class="logo-icon">✈</div>
+                <div class="logo-icon">CNS</div>
                 <div class="brand-text">
                     <h1>Cairns Airport FIDS</h1>
-                    <p id="userWelcomeBanner">LIVE FLIGHT TELEMETRY</p>
+                    <p id="userWelcomeBanner">LIVE TELEMETRY</p>
                 </div>
             </div>
             <div class="header-actions">
@@ -462,17 +613,17 @@
                     <span class="label">Movements</span>
                     <span class="value" id="total-count">0</span>
                 </div>
-                <button class="icon-btn" onclick="toggleChatDrawer()" title="Open Discussion Chat">💬</button>
-                <button class="icon-btn" id="adminNavBtn" onclick="openAdminCenter()" title="Admin Panel" style="display: none; border-color: var(--warning); color: var(--warning);">👑</button>
-                <button class="icon-btn" onclick="toggleModal('settingsModal', true)" title="Settings">⚙</button>
+                <button class="icon-btn" onclick="toggleChatDrawer()" title="Discussion Feed">CHAT</button>
+                <button class="icon-btn" id="adminNavBtn" onclick="openAdminCenter()" title="Admin Panel" style="display: none; border-color: var(--warning); color: var(--warning);">ADMIN</button>
+                <button class="icon-btn" onclick="toggleModal('settingsModal', true)" title="Settings">PREFS</button>
             </div>
         </header>
 
         <div class="container">
             <div class="controls-bar">
                 <div class="search-box">
-                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                    <input type="text" id="searchInput" placeholder="Filter by flight, airline, destination, or registration..." onkeyup="filterFlights()">
+                    <span class="search-icon">FILTER</span>
+                    <input type="text" id="searchInput" placeholder="Search flight, airline, destination, registration..." onkeyup="filterFlights()">
                 </div>
                 <div class="actions-group">
                     <div class="filter-tabs">
@@ -521,14 +672,14 @@
         let aircraftDb = {};
         let airlineDb = {};
         let currentFilter = 'all';
-        let isFirstLoad = true;
         let isSignUpMode = false;
         let currentUserEmail = '';
         let currentChatName = 'Anonymous';
         let currentUserRole = 'user';
         let currentRankName = 'user';
+        let currentAvatar = '■';
         let activeUsersCache = [];
-        let currentNoticeData = null;
+        let allNoticesList = [];
         const SUPREME_ADMIN_EMAIL = "xottovaggs@gmail.com";
 
         const tooltip = document.getElementById('global-tooltip');
@@ -537,87 +688,165 @@
         const tooltipCode = document.getElementById('tooltip-code');
 
         window.addEventListener('DOMContentLoaded', () => {
-            fetchNoticeData();
-            setInterval(fetchNoticeData, 10000);
+            fetchNotices();
+            fetchSystemState();
+            setInterval(fetchNotices, 8000);
         });
 
-        async function fetchNoticeData() {
+        async function fetchSystemState() {
             try {
-                const res = await fetch('/api/notice');
-                const data = await res.json();
-                currentNoticeData = data;
-                renderNoticeBanner();
+                const res = await fetch('/api/admin/system-state');
+                const state = await res.json();
+                document.getElementById('maintToggle').checked = Boolean(state.maintenance_mode);
+                const statElem = document.getElementById('statSysMode');
+                if (state.maintenance_mode) {
+                    statElem.textContent = "MAINTENANCE";
+                    statElem.style.color = "var(--warning)";
+                } else {
+                    statElem.textContent = "ONLINE";
+                    statElem.style.color = "var(--success)";
+                }
             } catch(err) {}
         }
 
-        function renderNoticeBanner() {
-            if (!currentNoticeData || !currentNoticeData.active) {
-                document.getElementById('noticeBanner').style.display = 'none';
-                return;
-            }
-
-            if (currentNoticeData.dismissible && sessionStorage.getItem('notice_dismissed') === 'true') {
-                document.getElementById('noticeBanner').style.display = 'none';
-                return;
-            }
-
-            let msg = currentNoticeData.msg_public;
-            if (currentNoticeData.mode === 'different' && currentUserEmail) {
-                msg = currentNoticeData.msg_logged || currentNoticeData.msg_public;
-            }
-
-            if (!msg) {
-                document.getElementById('noticeBanner').style.display = 'none';
-                return;
-            }
-
-            const banner = document.getElementById('noticeBanner');
-            banner.style.display = 'flex';
-            banner.style.background = currentNoticeData.color || '#0284c7';
-            banner.style.color = '#fff';
-            document.getElementById('noticeBannerText').textContent = msg;
-
-            const dismissBtn = document.getElementById('noticeDismissBtn');
-            dismissBtn.style.display = currentNoticeData.dismissible ? 'inline-block' : 'none';
-        }
-
-        function dismissNotice() {
-            sessionStorage.setItem('notice_dismissed', 'true');
-            document.getElementById('noticeBanner').style.display = 'none';
-        }
-
-        function toggleNoticeModeFields() {
-            const mode = document.getElementById('noticeModeSelect').value;
-            const msg2Group = document.getElementById('noticeMsg2Group');
-            const label1 = document.getElementById('noticeMsg1Label');
-            if (mode === 'different') {
-                msg2Group.style.display = 'block';
-                label1.textContent = "Notice Message (For Public / Logged Out)";
-            } else {
-                msg2Group.style.display = 'none';
-                label1.textContent = "Notice Message";
-            }
-        }
-
-        async function saveGlobalNotice() {
-            const active = document.getElementById('noticeActiveSelect').value === 'true';
-            const mode = document.getElementById('noticeModeSelect').value;
-            const msg_public = document.getElementById('noticeMsgPublic').value.trim();
-            const msg_logged = document.getElementById('noticeMsgLogged').value.trim();
-            const dismissible = document.getElementById('noticeDismissibleSelect').value === 'true';
-            const color = document.getElementById('noticeColorSelect').value;
-
+        async function toggleMaintenanceMode(enabled) {
             try {
-                const res = await fetch('/api/admin/notice', {
+                const res = await fetch('/api/admin/system-state', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({email: currentUserEmail, active, mode, msg_public, msg_logged, dismissible, color})
+                    body: JSON.stringify({email: currentUserEmail, maintenance_mode: enabled})
+                });
+                fetchSystemState();
+            } catch(err) {}
+        }
+
+        async function fetchNotices() {
+            try {
+                const res = await fetch('/api/notices');
+                allNoticesList = await res.json();
+                renderStackedNotices();
+                renderAdminNoticesList();
+            } catch(err) {}
+        }
+
+        function renderStackedNotices() {
+            const container = document.getElementById('noticesContainer');
+            const dock = document.getElementById('restorableNoticeDock');
+            container.innerHTML = '';
+            dock.innerHTML = '';
+
+            const dismissedIds = JSON.parse(sessionStorage.getItem('dismissed_notices') || '[]');
+            const hiddenIds = JSON.parse(sessionStorage.getItem('hidden_notices') || '[]');
+
+            allNoticesList.forEach(notice => {
+                const isLoggedIn = Boolean(currentUserEmail);
+                if (notice.target === 'logged_in' && !isLoggedIn) return;
+                if (notice.target === 'logged_out' && isLoggedIn) return;
+
+                if (hiddenIds.includes(notice.id) || notice.behavior === 'hidden') {
+                    if (!dismissedIds.includes(notice.id)) {
+                        const pill = document.createElement('div');
+                        pill.className = 'docked-notice-pill';
+                        pill.innerHTML = `<span>🛈 Notice: ${notice.title || 'Advisory'}</span>`;
+                        pill.onclick = () => restoreNotice(notice.id);
+                        dock.appendChild(pill);
+                    }
+                    return;
+                }
+
+                if (notice.behavior === 'dismissible' && dismissedIds.includes(notice.id)) return;
+
+                const bar = document.createElement('div');
+                bar.className = 'notice-bar';
+                bar.style.background = notice.color || '#0284c7';
+                bar.style.color = '#ffffff';
+
+                let actionBtns = '';
+                if (notice.behavior === 'dismissible') {
+                    actionBtns += `<button class="notice-action-btn" onclick="dismissSingleNotice(${notice.id})">Dismiss</button>`;
+                }
+                actionBtns += `<button class="notice-action-btn" onclick="hideSingleNotice(${notice.id})">Minimize</button>`;
+
+                bar.innerHTML = `
+                    <div class="notice-content">
+                        ${notice.title ? `<span class="notice-tag">${notice.title}</span>` : ''}
+                        <span>${notice.msg}</span>
+                    </div>
+                    <div class="notice-btn-group">${actionBtns}</div>
+                `;
+                container.appendChild(bar);
+            });
+        }
+
+        function dismissSingleNotice(id) {
+            let dismissedIds = JSON.parse(sessionStorage.getItem('dismissed_notices') || '[]');
+            if (!dismissedIds.includes(id)) dismissedIds.push(id);
+            sessionStorage.setItem('dismissed_notices', JSON.stringify(dismissedIds));
+            renderStackedNotices();
+        }
+
+        function hideSingleNotice(id) {
+            let hiddenIds = JSON.parse(sessionStorage.getItem('hidden_notices') || '[]');
+            if (!hiddenIds.includes(id)) hiddenIds.push(id);
+            sessionStorage.setItem('hidden_notices', JSON.stringify(hiddenIds));
+            renderStackedNotices();
+        }
+
+        function restoreNotice(id) {
+            let hiddenIds = JSON.parse(sessionStorage.getItem('hidden_notices') || '[]');
+            hiddenIds = hiddenIds.filter(i => i !== id);
+            sessionStorage.setItem('hidden_notices', JSON.stringify(hiddenIds));
+            
+            let dismissedIds = JSON.parse(sessionStorage.getItem('dismissed_notices') || '[]');
+            dismissedIds = dismissedIds.filter(i => i !== id);
+            sessionStorage.setItem('dismissed_notices', JSON.stringify(dismissedIds));
+
+            renderStackedNotices();
+        }
+
+        function renderAdminNoticesList() {
+            const listDiv = document.getElementById('adminNoticesList');
+            if (!listDiv) return;
+            if (!allNoticesList || allNoticesList.length === 0) {
+                listDiv.innerHTML = '<div style="font-size: 11px; color: var(--text-muted);">No active notices in stack.</div>';
+                return;
+            }
+
+            listDiv.innerHTML = allNoticesList.map(n => `
+                <div class="admin-notice-item">
+                    <div>
+                        <div style="font-size: 11px; font-weight: 700;">${n.title ? `[${n.title}] ` : ''}${n.msg}</div>
+                        <div style="font-size: 9px; color: var(--text-muted); margin-top: 2px;">
+                            Target: ${n.target} | Behavior: ${n.behavior}
+                        </div>
+                    </div>
+                    <button class="btn-sm btn-danger" onclick="deleteStackedNotice(${n.id})">Delete</button>
+                </div>
+            `).join('');
+        }
+
+        async function addStackedNotice() {
+            const target = document.getElementById('noticeTargetSelect').value;
+            const title = document.getElementById('noticeTitleInput').value.trim();
+            const msg = document.getElementById('noticeMsgInput').value.trim();
+            const behavior = document.getElementById('noticeBehaviorSelect').value;
+            const color = document.getElementById('noticeColorSelect').value;
+
+            if (!msg) return alert("Please enter a notice message.");
+
+            try {
+                const res = await fetch('/api/admin/notices/add', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({email: currentUserEmail, target, title, msg, behavior, color})
                 });
                 const data = await res.json();
                 if (data.status === 'success') {
-                    currentNoticeData = data.notice;
-                    renderNoticeBanner();
-                    alert("Global notice published successfully!");
+                    allNoticesList = data.notices;
+                    document.getElementById('noticeTitleInput').value = '';
+                    document.getElementById('noticeMsgInput').value = '';
+                    renderStackedNotices();
+                    renderAdminNoticesList();
                 } else {
                     alert(data.message);
                 }
@@ -626,13 +855,54 @@
             }
         }
 
+        async function deleteStackedNotice(id) {
+            try {
+                const res = await fetch('/api/admin/notices/delete', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({email: currentUserEmail, id: id})
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    allNoticesList = data.notices;
+                    renderStackedNotices();
+                    renderAdminNoticesList();
+                }
+            } catch(err) {}
+        }
+
+        async function injectCustomFlight() {
+            const airline = document.getElementById('injAirline').value.trim();
+            const flightNumber = document.getElementById('injFlightNum').value.trim();
+            const acType = document.getElementById('injAcType').value.trim();
+            const acRego = document.getElementById('injAcRego').value.trim();
+            const portName = document.getElementById('injPort').value.trim();
+            const portIATA = document.getElementById('injIATA').value.trim();
+            const vector = document.getElementById('injVector').value;
+
+            if (!airline || !flightNumber) return alert("Airline and Flight # required.");
+
+            try {
+                const res = await fetch('/api/admin/inject-flight', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({email: currentUserEmail, airline, flightNumber, acType, acRego, portName, portIATA, vector})
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    alert("Custom telemetry flight injected.");
+                    fetchFlights();
+                }
+            } catch(err) {}
+        }
+
         function toggleAuthMode() {
             isSignUpMode = !isSignUpMode;
             document.querySelector('.auth-header h2').textContent = isSignUpMode ? "Create Account" : "Cairns Airport";
-            document.getElementById('authSubtitle').textContent = isSignUpMode ? "Request access to FIDS portal" : "Flight Information Display System";
+            document.getElementById('authSubtitle').textContent = isSignUpMode ? "Request access clearance" : "Flight Information Display System";
             document.getElementById('nameFieldContainer').style.display = isSignUpMode ? "block" : "none";
-            document.getElementById('authSubmitBtn').textContent = isSignUpMode ? "Submit Request" : "Sign In";
-            document.getElementById('authToggleText').innerHTML = isSignUpMode ? "Already have an account? <span>Sign In</span>" : "Don't have an account? <span>Create Account</span>";
+            document.getElementById('authSubmitBtn').textContent = isSignUpMode ? "Submit Application" : "Sign In";
+            document.getElementById('authToggleText').innerHTML = isSignUpMode ? "Already registered? <span>Sign In</span>" : "Don't have an account? <span>Create Account</span>";
             document.getElementById('authError').style.display = "none";
         }
 
@@ -654,17 +924,16 @@
                     if (data.status === 'success') {
                         document.getElementById('authScreen').style.display = 'none';
                         document.getElementById('appContainer').style.display = 'block';
-                        document.getElementById('userWelcomeBanner').textContent = "SUPREME";
+                        document.getElementById('userWelcomeBanner').textContent = "SUPREME ADMIN";
                         document.getElementById('adminNavBtn').style.display = 'flex';
                         currentUserEmail = data.email;
                         currentChatName = data.name;
                         currentUserRole = data.role;
                         currentRankName = data.rank_name;
                         document.getElementById('customChatNameInput').value = currentChatName;
-                        document.getElementById('customRankNameInput').value = currentRankName;
                         setupAdminInterface();
                         initApp();
-                        renderNoticeBanner();
+                        renderStackedNotices();
                         return;
                     }
                 } catch(err) {}
@@ -705,19 +974,21 @@
                     if (data.status === 'normal') {
                         document.getElementById('authScreen').style.display = 'none';
                         document.getElementById('appContainer').style.display = 'block';
-                        document.getElementById('userWelcomeBanner').textContent = data.role === 'supreme' ? "SUPREME" : data.rank_name.toUpperCase();
+                        document.getElementById('userWelcomeBanner').textContent = data.role === 'supreme' ? "SUPREME ADMIN" : data.rank_name.toUpperCase();
                         currentUserEmail = data.email;
                         currentChatName = data.chat_name;
                         currentUserRole = data.role;
                         currentRankName = data.rank_name;
+                        currentAvatar = data.avatar || '■';
                         document.getElementById('customChatNameInput').value = currentChatName;
-                        document.getElementById('customRankNameInput').value = currentRankName;
+                        document.getElementById('customAvatarInput').value = currentAvatar;
+                        document.getElementById('customBioInput').value = data.bio || '';
                         if (currentUserRole === 'admin' || currentUserRole === 'supreme') {
                             document.getElementById('adminNavBtn').style.display = 'flex';
                             setupAdminInterface();
                         }
                         initApp();
-                        renderNoticeBanner();
+                        renderStackedNotices();
                     } else {
                         errDiv.textContent = data.message;
                         errDiv.style.display = 'block';
@@ -775,7 +1046,7 @@
             if (!activeUsersCache || activeUsersCache.length === 0) return;
             
             let listHtml = activeUsersCache.map(u => `• ${u.name} [${u.rank_name || u.role}]`).join('<br>');
-            showTooltip(e, "Active FreeFIDS Accounts", listHtml, `Total Connected: ${activeUsersCache.length}`);
+            showTooltip(e, "Connected Personnel", listHtml, `Active: ${activeUsersCache.length}`);
         }
 
         function toggleChatDrawer() {
@@ -791,23 +1062,23 @@
                 container.innerHTML = messages.map(m => {
                     let reactionsHtml = '';
                     if (m.reactions) {
-                        for (const [emoji, users] of Object.entries(m.reactions)) {
+                        for (const [glyph, users] of Object.entries(m.reactions)) {
                             const hasReacted = users.includes(currentChatName);
-                            reactionsHtml += `<span class="reaction-pill" style="${hasReacted ? 'border-color: var(--accent); background: rgba(2,132,199,0.15);' : ''}" onclick="toggleReaction(${m.id}, '${emoji}')">${emoji} ${users.length}</span>`;
+                            reactionsHtml += `<span class="reaction-pill" style="${hasReacted ? 'border-color: var(--accent); background: var(--accent-glow);' : ''}" onclick="toggleReaction(${m.id}, '${glyph}')">${glyph} ${users.length}</span>`;
                         }
                     }
                     return `
                         <div class="chat-msg">
                             <div class="chat-msg-header">
-                                <span class="chat-msg-sender" style="color: ${m.color || '#0284c7'};">${m.sender}</span>
+                                <span class="chat-msg-sender" style="color: ${m.color || '#0284c7'};" onclick="openUserProfile('', '${m.email}')">${m.sender}</span>
                                 <span class="chat-msg-time">${m.time}</span>
                             </div>
                             <div class="chat-msg-text">${m.text}</div>
                             <div class="chat-tools">
-                                <button class="emoji-picker-btn" onclick="toggleReaction(${m.id}, '👍')">👍</button>
-                                <button class="emoji-picker-btn" onclick="toggleReaction(${m.id}, '❤️')">❤️</button>
-                                <button class="emoji-picker-btn" onclick="toggleReaction(${m.id}, '✈️')">✈️</button>
-                                <button class="emoji-picker-btn" onclick="toggleReaction(${m.id}, '🔥')">🔥</button>
+                                <button class="glyph-btn" onclick="toggleReaction(${m.id}, '▲')">▲</button>
+                                <button class="glyph-btn" onclick="toggleReaction(${m.id}, '■')">■</button>
+                                <button class="glyph-btn" onclick="toggleReaction(${m.id}, '◈')">◈</button>
+                                <button class="glyph-btn" onclick="toggleReaction(${m.id}, '⚡')">⚡</button>
                             </div>
                             <div class="chat-reactions-row">${reactionsHtml}</div>
                         </div>
@@ -817,12 +1088,33 @@
             } catch(err) {}
         }
 
-        async function toggleReaction(msgId, emoji) {
+        async function openUserProfile(chatName, email) {
+            try {
+                const res = await fetch('/api/user/profile', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({email: email, chat_name: chatName})
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    document.getElementById('profAvatar').textContent = data.avatar || '■';
+                    document.getElementById('profName').textContent = data.name;
+                    document.getElementById('profRank').textContent = (data.rank_name || data.role).toUpperCase();
+                    document.getElementById('profEmail').textContent = data.email;
+                    document.getElementById('profBio').textContent = data.bio || 'No profile bioRecorded.';
+                    document.getElementById('profCreated').textContent = data.created_at || '2026-01-01';
+                    document.getElementById('profMsgs').textContent = data.total_messages || '0';
+                    toggleModal('userProfileModal', true);
+                }
+            } catch(err) {}
+        }
+
+        async function toggleReaction(msgId, glyph) {
             try {
                 await fetch('/api/chat/react', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({id: msgId, emoji: emoji, user: currentChatName})
+                    body: JSON.stringify({id: msgId, glyph: glyph, user: currentChatName})
                 });
                 fetchMessages();
             } catch(err) {}
@@ -836,18 +1128,20 @@
             if (!text) return;
 
             try {
-                await fetch('/api/chat/messages', {
+                const res = await fetch('/api/chat/messages', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({email: currentUserEmail, impersonate_email: impersonateEmail, text: text})
                 });
+                const data = await res.json();
+                if (data.status === 'error') alert(data.message);
                 input.value = '';
                 fetchMessages();
             } catch(err) {}
         }
 
         async function clearChatMessages() {
-            if (confirm("Are you sure you want to clear all chat messages?")) {
+            if (confirm("Purge chat stream history?")) {
                 try {
                     await fetch('/api/chat/clear', {
                         method: 'POST',
@@ -861,21 +1155,22 @@
 
         async function saveProfileChanges() {
             const newName = document.getElementById('customChatNameInput').value.trim();
-            const newRank = document.getElementById('customRankNameInput').value.trim();
-            if (!newName) return alert("Please enter a valid display name.");
+            const newAvatar = document.getElementById('customAvatarInput').value.trim();
+            const newBio = document.getElementById('customBioInput').value.trim();
+
+            if (!newName) return alert("Valid display name required.");
             
             try {
                 const res = await fetch('/api/update-profile', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({email: currentUserEmail, chat_name: newName, rank_name: newRank})
+                    body: JSON.stringify({email: currentUserEmail, chat_name: newName, avatar: newAvatar, bio: newBio})
                 });
                 const data = await res.json();
                 if (data.status === 'success') {
                     currentChatName = data.chat_name;
-                    currentRankName = data.rank_name;
-                    document.getElementById('userWelcomeBanner').textContent = currentUserRole === 'supreme' ? "SUPREME" : currentRankName.toUpperCase();
-                    alert("Profile preferences saved successfully!");
+                    currentAvatar = data.avatar;
+                    alert("Profile updated successfully.");
                 }
             } catch(err) {
                 alert("Failed to update profile.");
@@ -898,34 +1193,38 @@
                     
                     let actionsHtml = '';
                     if (!isTargetSupreme) {
-                        if (info.status !== 'normal') actionsHtml += `<button class="btn-sm" onclick="updateUserStatus('${email}', 'normal')">Approve</button>`;
-                        if (info.status !== 'suspended') actionsHtml += `<button class="btn-sm btn-danger" onclick="updateUserStatus('${email}', 'suspended')">Suspend</button>`;
+                        if (info.status !== 'normal') actionsHtml += `<button class="btn-sm" onclick="updateUserStatus('${email}', 'normal')">Clear</button>`;
+                        if (info.status !== 'suspended') actionsHtml += `<button class="btn-sm btn-danger" onclick="updateUserStatus('${email}', 'suspended')">Ban</button>`;
                         
-                        actionsHtml += `<button class="btn-sm" style="background: rgba(2,132,199,0.15); color: var(--accent); border-color: rgba(2,132,199,0.3);" onclick="openOverrideModal('${email}', '${info.name}', '${info.chat_name || ''}', '${info.rank_name || ''}')">Control</button>`;
+                        const muteLabel = info.muted ? 'Unmute' : 'Mute';
+                        actionsHtml += `<button class="btn-sm" onclick="toggleUserMute('${email}', ${!info.muted})">${muteLabel}</button>`;
+
+                        actionsHtml += `<button class="btn-sm" onclick="openOverrideModal('${email}', '${info.name}', '${info.chat_name || ''}', '${info.rank_name || ''}')">Edit</button>`;
 
                         if (currentUserRole === 'supreme') {
                             if (info.role === 'admin') {
                                 actionsHtml += `<button class="btn-sm" onclick="setUserRole('${email}', 'user')">Demote</button>`;
                             } else {
-                                actionsHtml += `<button class="btn-sm" onclick="setUserRole('${email}', 'admin')">Make Admin</button>`;
+                                actionsHtml += `<button class="btn-sm" onclick="setUserRole('${email}', 'admin')">Admin</button>`;
                             }
                         }
-                        actionsHtml += `<button class="btn-sm btn-danger" onclick="deleteUser('${email}')">Delete</button>`;
+                        actionsHtml += `<button class="btn-sm btn-danger" onclick="deleteUser('${email}')">Del</button>`;
                     } else {
-                        actionsHtml = `<span style="font-size: 11px; color: var(--text-muted);">Protected</span>`;
+                        actionsHtml = `<span style="font-size: 10px; color: var(--text-muted);">Protected</span>`;
                     }
 
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
-                        <td style="font-weight: 500;">${info.name}</td>
-                        <td style="color: var(--text-muted); font-family: 'JetBrains Mono', monospace; font-size: 12px;">${email}</td>
-                        <td><span class="status-badge ${roleBadgeClass}">${info.rank_name || info.role || info.status}</span></td>
-                        <td style="text-align: right; display: flex; gap: 6px; justify-content: flex-end; align-items: center;">${actionsHtml}</td>
+                        <td style="font-weight: 500;">${info.avatar || '■'} ${info.name}</td>
+                        <td style="color: var(--text-muted); font-family: 'JetBrains Mono', monospace; font-size: 11px;">${email}</td>
+                        <td><span class="status-badge ${roleBadgeClass}">${info.rank_name || info.role || info.status}</span> ${info.muted ? '<span style="color:var(--danger); font-size:10px;">[MUTED]</span>' : ''}</td>
+                        <td style="text-align: right; display: flex; gap: 4px; justify-content: flex-end; align-items: center;">${actionsHtml}</td>
                     `;
                     tbody.appendChild(tr);
                 }
                 document.getElementById('statTotalUsers').textContent = totalCount;
                 document.getElementById('statPendingUsers').textContent = pendingCount;
+                renderAdminNoticesList();
                 toggleModal('adminModal', true);
             } catch(err) {}
         }
@@ -934,8 +1233,8 @@
             document.getElementById('overrideTargetEmail').value = email;
             document.getElementById('overrideName').value = name;
             document.getElementById('overrideChatName').value = chatName || name;
-            document.getElementById('overrideRankName').value = rankName || 'peasant';
-            document.getElementById('overrideModalTitle').textContent = `Control Account: ${name}`;
+            document.getElementById('overrideRankName').value = rankName || 'Peasant';
+            document.getElementById('overrideModalTitle').textContent = `Account: ${name}`;
             toggleModal('overrideModal', true);
         }
 
@@ -956,7 +1255,6 @@
                     toggleModal('overrideModal', false);
                     openAdminCenter();
                     loadImpersonateDropdown();
-                    alert("Account profile overridden successfully!");
                 } else {
                     alert(data.message);
                 }
@@ -974,6 +1272,15 @@
             openAdminCenter();
         }
 
+        async function toggleUserMute(email, muted) {
+            await fetch('/api/admin/set-mute', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({email, muted})
+            });
+            openAdminCenter();
+        }
+
         async function setUserRole(email, role) {
             await fetch('/api/admin/set-role', {
                 method: 'POST',
@@ -984,7 +1291,7 @@
         }
 
         async function deleteUser(email) {
-            if (confirm(`Are you sure you want to delete ${email}?`)) {
+            if (confirm(`Delete account ${email}?`)) {
                 await fetch('/api/admin/delete-user', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
@@ -1002,11 +1309,15 @@
         }
 
         function setTheme(themeName, btn) {
-            document.body.className = '';
-            if (themeName === 'navy') document.body.classList.add('theme-navy');
-            if (themeName === 'mono') document.body.classList.add('theme-mono');
+            document.body.className = document.body.className.replace(/theme-\S+/g, '');
+            if (themeName !== 'default') document.body.classList.add(`theme-${themeName}`);
             document.querySelectorAll('#settingsModal .tab-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+            if (btn) btn.classList.add('active');
+        }
+
+        function toggleFxMode(enabled) {
+            if (enabled) document.body.classList.add('fx-enabled');
+            else document.body.classList.remove('fx-enabled');
         }
 
         function showTooltip(e, title, desc, code) {
@@ -1020,7 +1331,7 @@
         function updateTooltipPosition(e) {
             let left = e.clientX + 15;
             let top = e.clientY - 60;
-            if (left + 260 > window.innerWidth) left = e.clientX - 270;
+            if (left + 280 > window.innerWidth) left = e.clientX - 290;
             tooltip.style.left = `${left}px`;
             tooltip.style.top = `${top}px`;
         }
@@ -1078,7 +1389,7 @@
                 const rowHighlightClass = (isMilitary || isRare) ? 'rare-military-row' : '';
 
                 const isArrival = flight.vector === 'A';
-                const vectorBadge = isArrival ? '<span style="color: var(--success); font-weight:650;">↓ ARR</span>' : '<span style="color: var(--accent); font-weight:650;">↑ DEP</span>';
+                const vectorBadge = isArrival ? '<span style="color: var(--success); font-weight:800;">ARR</span>' : '<span style="color: var(--accent); font-weight:800;">DEP</span>';
 
                 const rawStatus = (flight.statusMsgPublic || '').trim();
                 let statusClass = 'status-neutral';
@@ -1102,7 +1413,7 @@
                         <td>${vectorBadge}</td>
                         <td>
                             <strong>${flight.portName}</strong><br>
-                            <span style="font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace;">${flight.portIATA}</span>
+                            <span style="font-size: 10px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace;">${flight.portIATA}</span>
                         </td>
                         <td><span style="font-family: 'JetBrains Mono', monospace; background: rgba(255,255,255,0.04); padding: 2px 6px; border-radius: 4px;">${flight.terminal || 'T2'}</span></td>
                         <td>
@@ -1162,7 +1473,7 @@
         }
 
         function downloadCSV() {
-            if (!allFlights || allFlights.length === 0) return alert("No data to export.");
+            if (!allFlights || allFlights.length === 0) return alert("No telemetry data to export.");
             const headers = ["id", "vector", "airline", "flightNumber", "portIATA", "portName", "terminal", "scheduled", "estimated", "statusMsgPublic", "gate", "stand", "acType", "acRego"];
             let csvRows = [headers.join(",")];
             allFlights.forEach(f => {
