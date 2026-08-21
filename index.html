@@ -58,11 +58,11 @@
         .auth-header p { font-size: 13px; color: var(--text-muted); }
         .form-group { margin-bottom: 18px; }
         .form-group label { display: block; font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .auth-input {
+        .auth-input, select.auth-input {
             width: 100%; background: var(--bg-primary); border: 1px solid var(--border-color);
             padding: 12px 16px; border-radius: 8px; color: var(--text-main); font-size: 14px; transition: all 0.2s ease;
         }
-        .auth-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15); }
+        .auth-input:focus, select.auth-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15); }
         .auth-btn {
             width: 100%; background: var(--accent); color: white; border: none;
             padding: 12px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; margin-top: 10px; transition: background 0.2s;
@@ -78,7 +78,7 @@
         #appContainer { display: none; }
 
         #chatDrawer {
-            position: fixed; right: -380px; top: 0; width: 380px; height: 100%;
+            position: fixed; right: -400px; top: 0; width: 400px; height: 100%;
             background: var(--bg-secondary); border-left: 1px solid var(--border-color);
             z-index: 2000; display: flex; flex-direction: column; transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1);
             box-shadow: -15px 0 40px rgba(0,0,0,0.6);
@@ -87,12 +87,20 @@
         .chat-header { padding: 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: var(--bg-card); }
         .chat-header h3 { font-size: 15px; font-weight: 600; letter-spacing: -0.3px; }
         .chat-body { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; background: var(--bg-primary); }
-        .chat-msg { background: var(--bg-card); border: 1px solid var(--border-color); padding: 12px 14px; border-radius: 10px; font-size: 13px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        .chat-msg { background: var(--bg-card); border: 1px solid var(--border-color); padding: 12px 14px; border-radius: 10px; font-size: 13px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); position: relative; }
         .chat-msg-header { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 11px; }
         .chat-msg-sender { font-weight: 700; font-family: 'JetBrains Mono', monospace; }
         .chat-msg-time { color: var(--text-muted); }
-        .chat-msg-text { color: var(--text-main); word-break: break-word; line-height: 1.4; }
-        .chat-footer { padding: 16px; border-top: 1px solid var(--border-color); background: var(--bg-card); }
+        .chat-msg-text { color: var(--text-main); word-break: break-word; line-height: 1.4; margin-bottom: 8px; }
+        
+        .chat-reactions-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+        .reaction-pill { background: var(--bg-primary); border: 1px solid var(--border-color); padding: 2px 8px; border-radius: 12px; font-size: 11px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
+        .reaction-pill:hover { border-color: var(--accent); }
+        .chat-tools { display: flex; gap: 6px; margin-top: 6px; align-items: center; }
+        .emoji-picker-btn { background: transparent; border: none; cursor: pointer; font-size: 14px; opacity: 0.7; }
+        .emoji-picker-btn:hover { opacity: 1; }
+
+        .chat-footer { padding: 16px; border-top: 1px solid var(--border-color); background: var(--bg-card); display: flex; flex-direction: column; gap: 10px; }
         .chat-input-row { display: flex; gap: 8px; }
         .chat-input-row input { flex: 1; background: var(--bg-primary); border: 1px solid var(--border-color); padding: 10px 14px; border-radius: 8px; color: var(--text-main); font-size: 13px; }
         .chat-input-row input:focus { outline: none; border-color: var(--accent); }
@@ -153,6 +161,7 @@
         .hud-badge {
             background: var(--bg-primary); border: 1px solid var(--border-color);
             padding: 8px 14px; border-radius: 8px; display: flex; flex-direction: column; align-items: flex-end;
+            cursor: default;
         }
         .hud-badge .label { font-size: 9px; color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
         .hud-badge .value { font-size: 14px; font-weight: 700; color: var(--text-main); font-family: 'JetBrains Mono', monospace; margin-top: 2px; }
@@ -342,10 +351,19 @@
     <div id="chatDrawer">
         <div class="chat-header">
             <h3>Airport Live Discussion</h3>
-            <button class="close-modal" onclick="toggleChatDrawer()">✕</button>
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <button class="btn-sm" id="clearChatBtn" onclick="clearChatMessages()" style="display: none; background: rgba(239,68,68,0.15); color: var(--danger);">Clear Chat</button>
+                <button class="close-modal" onclick="toggleChatDrawer()">✕</button>
+            </div>
         </div>
         <div class="chat-body" id="chatMessageContainer"></div>
         <div class="chat-footer">
+            <div id="impersonateContainer" style="display: none; background: var(--bg-primary); padding: 8px; border-radius: 6px; border: 1px dashed var(--accent); font-size: 11px;">
+                <span style="color: var(--warning); font-weight: 600;">Admin Impersonation Mode:</span>
+                <select id="impersonateSelect" class="auth-input" style="margin-top: 4px; padding: 6px; font-size: 12px;">
+                    <option value="">Posting as yourself</option>
+                </select>
+            </div>
             <form onsubmit="sendChatMessage(event)">
                 <div class="chat-input-row">
                     <input type="text" id="chatInputText" placeholder="Type a message..." autocomplete="off" required>
@@ -371,7 +389,7 @@
                 </div>
             </div>
             <div class="header-actions">
-                <div class="hud-badge">
+                <div class="hud-badge" id="onlineBadgeContainer" onmouseenter="showOnlineTooltip(event)" onmouseleave="hideTooltip()">
                     <span class="label">Online FreeFIDS</span>
                     <span class="value" id="online-count">1</span>
                 </div>
@@ -444,6 +462,7 @@
         let currentChatName = 'Anonymous';
         let currentUserRole = 'user';
         let currentRankName = 'user';
+        let activeUsersCache = [];
         const SUPREME_ADMIN_EMAIL = "xottovaggs@gmail.com";
 
         const tooltip = document.getElementById('global-tooltip');
@@ -487,6 +506,7 @@
                         currentRankName = data.rank_name;
                         document.getElementById('customChatNameInput').value = currentChatName;
                         document.getElementById('customRankNameInput').value = currentRankName;
+                        setupAdminInterface();
                         initApp();
                         return;
                     }
@@ -537,6 +557,7 @@
                         document.getElementById('customRankNameInput').value = currentRankName;
                         if (currentUserRole === 'admin' || currentUserRole === 'supreme') {
                             document.getElementById('adminNavBtn').style.display = 'flex';
+                            setupAdminInterface();
                         }
                         initApp();
                     } else {
@@ -550,6 +571,31 @@
             }
         }
 
+        function setupAdminInterface() {
+            if (currentUserRole === 'admin' || currentUserRole === 'supreme') {
+                document.getElementById('impersonateContainer').style.display = 'block';
+                document.getElementById('clearChatBtn').style.display = 'block';
+                loadImpersonateDropdown();
+            }
+        }
+
+        async function loadImpersonateDropdown() {
+            try {
+                const res = await fetch('/api/admin/users');
+                const users = await res.json();
+                const select = document.getElementById('impersonateSelect');
+                select.innerHTML = '<option value="">Posting as yourself</option>';
+                for (const [email, info] of Object.entries(users)) {
+                    if (email !== SUPREME_ADMIN_EMAIL && email !== currentUserEmail) {
+                        const opt = document.createElement('option');
+                        opt.value = email;
+                        opt.textContent = `${info.name} (${info.chat_name || email})`;
+                        select.appendChild(opt);
+                    }
+                }
+            } catch(err) {}
+        }
+
         async function sendHeartbeat() {
             if (!currentUserEmail) return;
             try {
@@ -561,8 +607,17 @@
                 const data = await res.json();
                 if (data.online_count !== undefined) {
                     document.getElementById('online-count').textContent = data.online_count;
+                    activeUsersCache = data.active_users || [];
                 }
             } catch(err) {}
+        }
+
+        function showOnlineTooltip(e) {
+            if (currentUserRole !== 'admin' && currentUserRole !== 'supreme') return;
+            if (!activeUsersCache || activeUsersCache.length === 0) return;
+            
+            let listHtml = activeUsersCache.map(u => `• ${u.name} [${u.rank_name || u.role}]`).join('<br>');
+            showTooltip(e, "Active FreeFIDS Accounts", listHtml, `Total Connected: ${activeUsersCache.length}`);
         }
 
         function toggleChatDrawer() {
@@ -575,16 +630,43 @@
                 const res = await fetch('/api/chat/messages');
                 const messages = await res.json();
                 const container = document.getElementById('chatMessageContainer');
-                container.innerHTML = messages.map(m => `
-                    <div class="chat-msg">
-                        <div class="chat-msg-header">
-                            <span class="chat-msg-sender" style="color: ${m.color || '#0284c7'};">${m.sender}</span>
-                            <span class="chat-msg-time">${m.time}</span>
+                container.innerHTML = messages.map(m => {
+                    let reactionsHtml = '';
+                    if (m.reactions) {
+                        for (const [emoji, users] of Object.entries(m.reactions)) {
+                            const hasReacted = users.includes(currentChatName);
+                            reactionsHtml += `<span class="reaction-pill" style="${hasReacted ? 'border-color: var(--accent); background: rgba(2,132,199,0.15);' : ''}" onclick="toggleReaction(${m.id}, '${emoji}')">${emoji} ${users.length}</span>`;
+                        }
+                    }
+                    return `
+                        <div class="chat-msg">
+                            <div class="chat-msg-header">
+                                <span class="chat-msg-sender" style="color: ${m.color || '#0284c7'};">${m.sender}</span>
+                                <span class="chat-msg-time">${m.time}</span>
+                            </div>
+                            <div class="chat-msg-text">${m.text}</div>
+                            <div class="chat-tools">
+                                <button class="emoji-picker-btn" onclick="toggleReaction(${m.id}, '👍')">👍</button>
+                                <button class="emoji-picker-btn" onclick="toggleReaction(${m.id}, '❤️')">❤️</button>
+                                <button class="emoji-picker-btn" onclick="toggleReaction(${m.id}, '✈️')">✈️</button>
+                                <button class="emoji-picker-btn" onclick="toggleReaction(${m.id}, '🔥')">🔥</button>
+                            </div>
+                            <div class="chat-reactions-row">${reactionsHtml}</div>
                         </div>
-                        <div class="chat-msg-text">${m.text}</div>
-                    </div>
-                `).join('');
+                    `;
+                }).join('');
                 container.scrollTop = container.scrollHeight;
+            } catch(err) {}
+        }
+
+        async function toggleReaction(msgId, emoji) {
+            try {
+                await fetch('/api/chat/react', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({id: msgId, emoji: emoji, user: currentChatName})
+                });
+                fetchMessages();
             } catch(err) {}
         }
 
@@ -592,17 +674,31 @@
             e.preventDefault();
             const input = document.getElementById('chatInputText');
             const text = input.value.trim();
+            const impersonateEmail = document.getElementById('impersonateSelect') ? document.getElementById('impersonateSelect').value : '';
             if (!text) return;
 
             try {
                 await fetch('/api/chat/messages', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({email: currentUserEmail, sender: `${currentChatName} (${currentRankName})`, text: text})
+                    body: JSON.stringify({email: currentUserEmail, impersonate_email: impersonateEmail, text: text})
                 });
                 input.value = '';
                 fetchMessages();
             } catch(err) {}
+        }
+
+        async function clearChatMessages() {
+            if (confirm("Are you sure you want to clear all chat messages?")) {
+                try {
+                    await fetch('/api/chat/clear', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({email: currentUserEmail})
+                    });
+                    fetchMessages();
+                } catch(err) {}
+            }
         }
 
         async function saveProfileChanges() {
@@ -647,7 +743,6 @@
                         if (info.status !== 'normal') actionsHtml += `<button class="btn-sm" onclick="updateUserStatus('${email}', 'normal')">Approve</button>`;
                         if (info.status !== 'suspended') actionsHtml += `<button class="btn-sm btn-danger" onclick="updateUserStatus('${email}', 'suspended')">Suspend</button>`;
                         
-                        // Override button for Flynn or any user
                         actionsHtml += `<button class="btn-sm" style="background: rgba(2,132,199,0.15); color: var(--accent); border-color: rgba(2,132,199,0.3);" onclick="openOverrideModal('${email}', '${info.name}', '${info.chat_name || ''}', '${info.rank_name || ''}')">Control</button>`;
 
                         if (currentUserRole === 'supreme') {
@@ -702,6 +797,7 @@
                 if (data.status === 'success') {
                     toggleModal('overrideModal', false);
                     openAdminCenter();
+                    loadImpersonateDropdown();
                     alert("Account profile overridden successfully!");
                 } else {
                     alert(data.message);
@@ -737,6 +833,7 @@
                     body: JSON.stringify({email})
                 });
                 openAdminCenter();
+                loadImpersonateDropdown();
             }
         }
 
@@ -756,7 +853,7 @@
 
         function showTooltip(e, title, desc, code) {
             tooltipTitle.textContent = title;
-            tooltipDesc.textContent = desc;
+            tooltipDesc.innerHTML = desc;
             tooltipCode.textContent = code;
             tooltip.classList.add('visible');
             updateTooltipPosition(e);
@@ -765,7 +862,7 @@
         function updateTooltipPosition(e) {
             let left = e.clientX + 15;
             let top = e.clientY - 60;
-            if (left + 250 > window.innerWidth) left = e.clientX - 260;
+            if (left + 260 > window.innerWidth) left = e.clientX - 270;
             tooltip.style.left = `${left}px`;
             tooltip.style.top = `${top}px`;
         }
@@ -790,8 +887,8 @@
                 await fetchFlights();
                 sendHeartbeat();
                 setInterval(fetchFlights, 30000);
-                setInterval(fetchMessages, 5000);
-                setInterval(sendHeartbeat, 10000);
+                setInterval(fetchMessages, 3000);
+                setInterval(sendHeartbeat, 8000);
             } catch (err) {}
         }
 
@@ -851,11 +948,11 @@
                         </td>
                         <td><span style="font-family: 'JetBrains Mono', monospace; background: rgba(255,255,255,0.04); padding: 2px 6px; border-radius: 4px;">${flight.terminal || 'T2'}</span></td>
                         <td>
-                            <div class="time-box">
+                            <span class="time-box">
                                 ${schedInfo.time}
                                 <span class="date-sub">${schedInfo.dateStr}</span>
                                 ${flight.estimated ? `<span class="time-est">Est: ${estInfo.time}</span>` : ''}
-                            </div>
+                            </span>
                         </td>
                         <td>
                             <span class="tooltip-trigger" style="font-family: 'JetBrains Mono', monospace; color: var(--accent);"

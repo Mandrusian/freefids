@@ -26,7 +26,7 @@ session = requests.Session()
 USER_FILE = "users.json"
 CHAT_FILE = "chats.json"
 
-ACTIVE_USERS = set()
+ACTIVE_USERS = {} # email -> timestamp of last heartbeat
 
 def load_users():
     default_users = {
@@ -67,7 +67,7 @@ def load_chats():
                 return json.load(f)
         except Exception:
             pass
-    return [{"sender": "System", "text": "Welcome to the Cairns Airport live discussion stream.", "time": "08:00", "color": "#94a3b8"}]
+    return [{"id": 1, "sender": "System", "email": "system@fids", "text": "Welcome to the enhanced Cairns Airport live discussion stream.", "time": "08:00", "color": "#94a3b8", "reactions": {}}]
 
 def save_chats(chats):
     try:
@@ -146,7 +146,7 @@ def login_user(data: dict = Body(...)):
     if user["status"] == "suspended":
         return {"status": "error", "message": "This account has been suspended."}
         
-    ACTIVE_USERS.add(email)
+    ACTIVE_USERS[email] = datetime.now().timestamp()
     return {
         "status": "normal", 
         "email": email, 
@@ -159,10 +159,28 @@ def login_user(data: dict = Body(...)):
 
 @app.post("/api/heartbeat")
 def heartbeat(data: dict = Body(...)):
+    global USER_STORE
+    USER_STORE = load_users()
     email = data.get("email", "").strip().lower()
     if email:
-        ACTIVE_USERS.add(email)
-    return {"online_count": max(1, len(ACTIVE_USERS))}
+        ACTIVE_USERS[email] = datetime.now().timestamp()
+        
+    # Clean inactive users (> 30 seconds old)
+    now = datetime.now().timestamp()
+    active_list = []
+    for em, t in list(ACTIVE_USERS.items()):
+        if now - t < 35:
+            if em in USER_STORE:
+                active_list.append({
+                    "email": em,
+                    "name": USER_STORE[em]["name"],
+                    "role": USER_STORE[em].get("role", "user"),
+                    "rank_name": USER_STORE[em].get("rank_name", "user")
+                })
+        else:
+            del ACTIVE_USERS[em]
+            
+    return {"online_count": max(1, len(active_list)), "active_users": active_list}
 
 @app.post("/api/update-profile")
 def update_profile(data: dict = Body(...)):
@@ -185,7 +203,7 @@ def update_profile(data: dict = Body(...)):
 def admin_login(data: dict = Body(...)):
     password = data.get("password")
     if password == "vaggs54":
-        ACTIVE_USERS.add(SUPREME_ADMIN_EMAIL)
+        ACTIVE_USERS[SUPREME_ADMIN_EMAIL] = datetime.now().timestamp()
         return {"status": "success", "email": SUPREME_ADMIN_EMAIL, "name": "Xavi (Supreme Admin) 👑", "role": "supreme", "rank_name": "Supreme", "message": "Admin authenticated."}
     return {"status": "error", "message": "Incorrect administrator password."}
 
@@ -283,32 +301,78 @@ def post_message(data: dict = Body(...)):
     CHAT_STORE = load_chats()
     
     email = data.get("email", "").strip().lower()
-    sender = data.get("sender", "Anonymous").strip()
+    impersonate_email = data.get("impersonate_email", "").strip().lower()
     text = data.get("text", "").strip()
     
-    color = "#94a3b8" # Default muted
-    if email in USER_STORE:
-        role = USER_STORE[email].get("role", "user")
-        if role == "supreme":
-            color = "#60a5fa" # Blue/Cyan
-        elif role == "admin":
-            color = "#c084fc" # Purple
-        else:
-            color = "#10b981" # Green
+    # Check if admin is impersonating someone else
+    posting_email = email
+    if impersonate_email and impersonate_email in USER_STORE and email in USER_STORE:
+        if USER_STORE[email].get("role") in ["admin", "supreme"]:
+            posting_email = impersonate_email
+
+    user_info = USER_STORE.get(posting_email, {"name": "User", "chat_name": "User", "role": "user", "rank_name": "peasant"})
+    
+    role = user_info.get("role", "user")
+    if role == "supreme":
+        color = "#60a5fa"
+    elif role == "admin":
+        color = "#c084fc"
+    else:
+        color = "#10b981"
+        
+    sender_display = f"{user_info.get('chat_name', 'User')} ({user_info.get('rank_name', 'user')})"
             
     if text:
         msg = {
-            "sender": sender,
+            "id": len(CHAT_STORE) + 1,
+            "sender": sender_display,
+            "email": posting_email,
             "text": text,
             "time": datetime.now().strftime("%H:%M"),
-            "color": color
+            "color": color,
+            "reactions": {}
         }
         CHAT_STORE.append(msg)
-        if len(CHAT_STORE) > 100:
-            CHAT_STORE = CHAT_STORE[-100:]
+        if len(CHAT_STORE) > 150:
+            CHAT_STORE = CHAT_STORE[-150:]
         save_chats(CHAT_STORE)
         return {"status": "success", "message": msg}
     return {"status": "error", "message": "Empty message."}
+
+@app.post("/api/chat/react")
+def react_message(data: dict = Body(...)):
+    global CHAT_STORE
+    CHAT_STORE = load_chats()
+    msg_id = data.get("id")
+    emoji = data.get("emoji")
+    user = data.get("user")
+    
+    for m in CHAT_STORE:
+        if m.get("id") == msg_id:
+            if "reactions" not in m:
+                m["reactions"] = {}
+            if emoji not in m["reactions"]:
+                m["reactions"][emoji] = []
+            if user in m["reactions"][emoji]:
+                m["reactions"][emoji].remove(user)
+                if not m["reactions"][emoji]:
+                    del m["reactions"][emoji]
+            else:
+                m["reactions"][emoji].append(user)
+            save_chats(CHAT_STORE)
+            return {"status": "success", "reactions": m["reactions"]}
+    return {"status": "error", "message": "Message not found."}
+
+@app.post("/api/chat/clear")
+def clear_chat(data: dict = Body(...)):
+    global USER_STORE, CHAT_STORE
+    USER_STORE = load_users()
+    email = data.get("email", "").strip().lower()
+    if email in USER_STORE and USER_STORE[email].get("role") in ["admin", "supreme"]:
+        CHAT_STORE = [{"id": 1, "sender": "System", "email": "system@fids", "text": "Chat history wiped by administrator.", "time": datetime.now().strftime("%H:%M"), "color": "#ef4444", "reactions": {}}]
+        save_chats(CHAT_STORE)
+        return {"status": "success"}
+    return {"status": "error", "message": "Unauthorized."}
 
 @app.get("/api/flights")
 def get_flights():
