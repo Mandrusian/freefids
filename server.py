@@ -43,12 +43,10 @@ def load_users():
         except Exception:
             pass
             
-    # Ensure all default users are always present and updated
     for email, info in default_users.items():
         if email not in data:
             data[email] = info
             
-    # Always enforce absolute protection & correct rank for Supreme Admin
     data[SUPREME_ADMIN_EMAIL] = {"name": "Xavi (Supreme Admin) 👑", "chat_name": "Xavi", "status": "normal", "role": "supreme", "rank_name": "Supreme"}
     
     save_users(data)
@@ -69,7 +67,7 @@ def load_chats():
                 return json.load(f)
         except Exception:
             pass
-    return [{"sender": "System", "text": "Welcome to the Cairns Airport live discussion stream.", "time": "08:00"}]
+    return [{"sender": "System", "text": "Welcome to the Cairns Airport live discussion stream.", "time": "08:00", "color": "#94a3b8"}]
 
 def save_chats(chats):
     try:
@@ -128,7 +126,7 @@ def register_user(data: dict = Body(...)):
     if email in USER_STORE:
         return {"status": "error", "message": "Account already exists. Please log in."}
     
-    USER_STORE[email] = {"name": name, "chat_name": name.split()[0], "status": "pending", "role": "user", "rank_name": "user"}
+    USER_STORE[email] = {"name": name, "chat_name": name.split()[0], "status": "pending", "role": "user", "rank_name": "peasant"}
     save_users(USER_STORE)
     return {"status": "success", "message": "Registration received. Please wait for admin approval."}
 
@@ -155,7 +153,7 @@ def login_user(data: dict = Body(...)):
         "name": user["name"], 
         "chat_name": user.get("chat_name", user["name"]), 
         "role": user.get("role", "user"),
-        "rank_name": user.get("rank_name", "user"),
+        "rank_name": user.get("rank_name", "peasant"),
         "message": "Login successful."
     }
 
@@ -218,7 +216,7 @@ def admin_set_role(data: dict = Body(...)):
     global USER_STORE
     USER_STORE = load_users()
     email = data.get("email", "").strip().lower()
-    role = data.get("role") # 'user' or 'admin'
+    role = data.get("role")
     
     if email == SUPREME_ADMIN_EMAIL:
         return {"status": "error", "message": "Cannot modify Supreme Admin role."}
@@ -232,6 +230,29 @@ def admin_set_role(data: dict = Body(...)):
         save_users(USER_STORE)
         return {"status": "success", "message": f"Updated role for {email} to {role}."}
     return {"status": "error", "message": "User not found or invalid role."}
+
+@app.post("/api/admin/force-edit-user")
+def admin_force_edit_user(data: dict = Body(...)):
+    global USER_STORE
+    USER_STORE = load_users()
+    email = data.get("email", "").strip().lower()
+    new_name = data.get("name", "").strip()
+    new_chat_name = data.get("chat_name", "").strip()
+    new_rank_name = data.get("rank_name", "").strip()
+    
+    if email == SUPREME_ADMIN_EMAIL:
+        return {"status": "error", "message": "Cannot override Supreme Admin account."}
+        
+    if email in USER_STORE:
+        if new_name:
+            USER_STORE[email]["name"] = new_name
+        if new_chat_name:
+            USER_STORE[email]["chat_name"] = new_chat_name
+        if new_rank_name:
+            USER_STORE[email]["rank_name"] = new_rank_name
+        save_users(USER_STORE)
+        return {"status": "success", "message": f"Updated user profile for {email}."}
+    return {"status": "error", "message": "User not found."}
 
 @app.post("/api/admin/delete-user")
 def admin_delete_user(data: dict = Body(...)):
@@ -257,14 +278,30 @@ def get_messages():
 @app.post("/api/chat/messages")
 def post_message(data: dict = Body(...)):
     global CHAT_STORE
+    global USER_STORE
+    USER_STORE = load_users()
     CHAT_STORE = load_chats()
+    
+    email = data.get("email", "").strip().lower()
     sender = data.get("sender", "Anonymous").strip()
     text = data.get("text", "").strip()
+    
+    color = "#94a3b8" # Default muted
+    if email in USER_STORE:
+        role = USER_STORE[email].get("role", "user")
+        if role == "supreme":
+            color = "#60a5fa" # Blue/Cyan
+        elif role == "admin":
+            color = "#c084fc" # Purple
+        else:
+            color = "#10b981" # Green
+            
     if text:
         msg = {
             "sender": sender,
             "text": text,
-            "time": datetime.now().strftime("%H:%M")
+            "time": datetime.now().strftime("%H:%M"),
+            "color": color
         }
         CHAT_STORE.append(msg)
         if len(CHAT_STORE) > 100:

@@ -4,204 +4,216 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cairns Airport Flight Information Display System</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-primary: #0f141c;
-            --bg-secondary: #182030;
+            --bg-primary: #07090e;
+            --bg-secondary: #0d1322;
+            --bg-card: #131b2e;
             --border-color: rgba(255, 255, 255, 0.08);
-            --text-main: #f8fafc;
+            --border-hover: rgba(2, 132, 199, 0.4);
+            --text-main: #f1f5f9;
             --text-muted: #94a3b8;
             --accent: #0284c7;
             --accent-hover: #0369a1;
             --success: #10b981;
             --warning: #f59e0b;
             --danger: #ef4444;
-            --radius: 10px;
+            --radius: 12px;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
 
         body.theme-navy {
-            --bg-primary: #0b1120;
-            --bg-secondary: #1e293b;
+            --bg-primary: #050b14;
+            --bg-secondary: #0f1c30;
+            --bg-card: #172842;
             --accent: #3b82f6;
+            --accent-hover: #2563eb;
         }
 
         body.theme-mono {
             --bg-primary: #09090b;
-            --bg-secondary: #18181b;
+            --bg-secondary: #121215;
+            --bg-card: #1a1a1e;
             --accent: #71717a;
-            --success: #fafafa;
+            --accent-hover: #52525b;
+            --success: #f4f4f5;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
-        body { background-color: var(--bg-primary); color: var(--text-main); min-height: 100vh; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background-color: var(--bg-primary); color: var(--text-main); min-height: 100vh; overflow-x: hidden; }
 
         #authScreen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg-primary); display: flex; align-items: center; justify-content: center; z-index: 99999;
+            background: radial-gradient(circle at center, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+            display: flex; align-items: center; justify-content: center; z-index: 99999;
         }
         .auth-card {
-            background: var(--bg-secondary); border: 1px solid var(--border-color);
-            padding: 36px; border-radius: var(--radius); width: 100%; max-width: 400px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            background: var(--bg-card); border: 1px solid var(--border-color);
+            padding: 40px; border-radius: var(--radius); width: 100%; max-width: 420px;
+            box-shadow: var(--shadow); backdrop-filter: blur(10px);
         }
-        .auth-header { margin-bottom: 24px; }
-        .auth-header h2 { font-size: 20px; font-weight: 600; color: var(--text-main); margin-bottom: 4px; }
+        .auth-header { margin-bottom: 24px; text-align: left; }
+        .auth-header h2 { font-size: 22px; font-weight: 700; color: var(--text-main); margin-bottom: 6px; letter-spacing: -0.5px; }
         .auth-header p { font-size: 13px; color: var(--text-muted); }
-        .form-group { margin-bottom: 16px; }
-        .form-group label { display: block; font-size: 12px; font-weight: 500; color: var(--text-muted); margin-bottom: 6px; }
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
         .auth-input {
             width: 100%; background: var(--bg-primary); border: 1px solid var(--border-color);
-            padding: 10px 14px; border-radius: 6px; color: var(--text-main); font-size: 14px;
+            padding: 12px 16px; border-radius: 8px; color: var(--text-main); font-size: 14px; transition: all 0.2s ease;
         }
-        .auth-input:focus { outline: none; border-color: var(--accent); }
+        .auth-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15); }
         .auth-btn {
             width: 100%; background: var(--accent); color: white; border: none;
-            padding: 11px; border-radius: 6px; font-weight: 600; font-size: 14px; cursor: pointer; margin-top: 8px;
+            padding: 12px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; margin-top: 10px; transition: background 0.2s;
         }
         .auth-btn:hover { background: var(--accent-hover); }
-        .auth-footer { margin-top: 20px; text-align: center; font-size: 13px; color: var(--text-muted); cursor: pointer; }
-        .auth-footer span { color: var(--accent); font-weight: 500; }
+        .auth-footer { margin-top: 24px; text-align: center; font-size: 13px; color: var(--text-muted); cursor: pointer; }
+        .auth-footer span { color: var(--accent); font-weight: 600; }
         .auth-error {
             background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2);
-            color: var(--danger); font-size: 12px; padding: 10px; border-radius: 6px; margin-bottom: 16px; display: none;
+            color: var(--danger); font-size: 13px; padding: 12px; border-radius: 8px; margin-bottom: 20px; display: none;
         }
 
         #appContainer { display: none; }
 
         #chatDrawer {
-            position: fixed; right: -360px; top: 0; width: 360px; height: 100%;
+            position: fixed; right: -380px; top: 0; width: 380px; height: 100%;
             background: var(--bg-secondary); border-left: 1px solid var(--border-color);
-            z-index: 2000; display: flex; flex-direction: column; transition: right 0.3s ease;
-            box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+            z-index: 2000; display: flex; flex-direction: column; transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: -15px 0 40px rgba(0,0,0,0.6);
         }
         #chatDrawer.open { right: 0; }
-        .chat-header { padding: 18px 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
-        .chat-header h3 { font-size: 15px; font-weight: 600; }
-        .chat-body { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
-        .chat-msg { background: var(--bg-primary); border: 1px solid var(--border-color); padding: 10px 12px; border-radius: 8px; font-size: 13px; }
-        .chat-msg-header { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 11px; }
-        .chat-msg-sender { font-weight: 600; color: var(--accent); }
+        .chat-header { padding: 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: var(--bg-card); }
+        .chat-header h3 { font-size: 15px; font-weight: 600; letter-spacing: -0.3px; }
+        .chat-body { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; background: var(--bg-primary); }
+        .chat-msg { background: var(--bg-card); border: 1px solid var(--border-color); padding: 12px 14px; border-radius: 10px; font-size: 13px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        .chat-msg-header { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 11px; }
+        .chat-msg-sender { font-weight: 700; font-family: 'JetBrains Mono', monospace; }
         .chat-msg-time { color: var(--text-muted); }
-        .chat-msg-text { color: var(--text-main); word-break: break-word; }
-        .chat-footer { padding: 16px; border-top: 1px solid var(--border-color); background: var(--bg-primary); }
+        .chat-msg-text { color: var(--text-main); word-break: break-word; line-height: 1.4; }
+        .chat-footer { padding: 16px; border-top: 1px solid var(--border-color); background: var(--bg-card); }
         .chat-input-row { display: flex; gap: 8px; }
-        .chat-input-row input { flex: 1; background: var(--bg-secondary); border: 1px solid var(--border-color); padding: 8px 12px; border-radius: 6px; color: var(--text-main); font-size: 13px; }
+        .chat-input-row input { flex: 1; background: var(--bg-primary); border: 1px solid var(--border-color); padding: 10px 14px; border-radius: 8px; color: var(--text-main); font-size: 13px; }
         .chat-input-row input:focus { outline: none; border-color: var(--accent); }
 
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px);
+            background: rgba(5, 7, 12, 0.75); backdrop-filter: blur(6px);
             display: flex; align-items: center; justify-content: center; z-index: 10000;
-            opacity: 0; visibility: hidden; transition: all 0.2s ease;
+            opacity: 0; visibility: hidden; transition: all 0.25s ease;
         }
         .modal-overlay.active { opacity: 1; visibility: visible; }
         .modal-card {
-            background: var(--bg-secondary); border: 1px solid var(--border-color);
-            border-radius: var(--radius); width: 90%; max-width: 750px; padding: 28px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            background: var(--bg-card); border: 1px solid var(--border-color);
+            border-radius: var(--radius); width: 90%; max-width: 800px; padding: 32px;
+            box-shadow: var(--shadow);
         }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; }
-        .modal-header h3 { font-size: 16px; font-weight: 600; }
-        .close-modal { background: transparent; border: none; color: var(--text-muted); font-size: 16px; cursor: pointer; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 1px solid var(--border-color); padding-bottom: 16px; }
+        .modal-header h3 { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
+        .close-modal { background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: var(--text-muted); width: 32px; height: 32px; border-radius: 6px; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .close-modal:hover { background: rgba(255,255,255,0.1); color: var(--text-main); }
 
-        .admin-stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
-        .admin-stat-card { background: var(--bg-primary); border: 1px solid var(--border-color); padding: 14px; border-radius: 6px; }
-        .admin-stat-card .lbl { font-size: 11px; color: var(--text-muted); text-transform: uppercase; }
-        .admin-stat-card .val { font-size: 20px; font-weight: 700; color: var(--text-main); margin-top: 4px; }
+        .admin-stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+        .admin-stat-card { background: var(--bg-primary); border: 1px solid var(--border-color); padding: 18px; border-radius: 10px; }
+        .admin-stat-card .lbl { font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
+        .admin-stat-card .val { font-size: 24px; font-weight: 700; color: var(--text-main); margin-top: 6px; }
 
         .user-table { width: 100%; border-collapse: collapse; }
-        .user-table th { text-align: left; font-size: 11px; color: var(--text-muted); padding: 10px 12px; border-bottom: 1px solid var(--border-color); }
-        .user-table td { padding: 12px; border-bottom: 1px solid var(--border-color); font-size: 13px; }
-        .status-badge { padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
-        .badge-normal { background: rgba(16, 185, 129, 0.1); color: var(--success); }
-        .badge-pending { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
-        .badge-suspended { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
-        .badge-supreme { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
-        .badge-admin { background: rgba(168, 85, 247, 0.15); color: #c084fc; }
+        .user-table th { text-align: left; font-size: 11px; color: var(--text-muted); padding: 12px 16px; border-bottom: 1px solid var(--border-color); font-family: 'JetBrains Mono', monospace; text-transform: uppercase; }
+        .user-table td { padding: 14px 16px; border-bottom: 1px solid var(--border-color); font-size: 13px; }
+        .status-badge { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; text-transform: uppercase; font-family: 'JetBrains Mono', monospace; }
+        .badge-normal { background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16,185,129,0.2); }
+        .badge-pending { background: rgba(245, 158, 11, 0.1); color: var(--warning); border: 1px solid rgba(245,158,11,0.2); }
+        .badge-suspended { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239,68,68,0.2); }
+        .badge-supreme { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); }
+        .badge-admin { background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168,85,247,0.3); }
 
         .btn-sm {
-            padding: 5px 10px; border-radius: 4px; font-size: 11px; font-weight: 500;
-            border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-main); cursor: pointer;
+            padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 600;
+            border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-main); cursor: pointer; transition: all 0.2s;
         }
-        .btn-sm:hover { background: rgba(255,255,255,0.05); }
+        .btn-sm:hover { background: rgba(255,255,255,0.08); border-color: var(--accent); }
         .btn-danger { color: var(--danger); border-color: rgba(239,68,68,0.3); }
+        .btn-danger:hover { background: rgba(239,68,68,0.15); }
+        .btn-primary-admin { background: var(--accent); color: white; border: none; }
+        .btn-primary-admin:hover { background: var(--accent-hover); }
 
         header {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 18px 32px; background: var(--bg-secondary); border-bottom: 1px solid var(--border-color);
-            position: sticky; top: 0; z-index: 100;
+            padding: 20px 36px; background: var(--bg-secondary); border-bottom: 1px solid var(--border-color);
+            position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         }
-        .brand { display: flex; align-items: center; gap: 12px; }
-        .logo-icon { width: 36px; height: 36px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
-        .brand-text h1 { font-size: 16px; font-weight: 600; }
-        .brand-text p { font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+        .brand { display: flex; align-items: center; gap: 14px; }
+        .logo-icon { width: 40px; height: 40px; background: var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3); }
+        .brand-text h1 { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; }
+        .brand-text p { font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; margin-top: 2px; }
 
         .header-actions { display: flex; align-items: center; gap: 12px; }
         .hud-badge {
             background: var(--bg-primary); border: 1px solid var(--border-color);
-            padding: 6px 12px; border-radius: 6px; display: flex; flex-direction: column; align-items: flex-end;
+            padding: 8px 14px; border-radius: 8px; display: flex; flex-direction: column; align-items: flex-end;
         }
-        .hud-badge .label { font-size: 9px; color: var(--text-muted); text-transform: uppercase; }
-        .hud-badge .value { font-size: 14px; font-weight: 600; color: var(--text-main); }
+        .hud-badge .label { font-size: 9px; color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
+        .hud-badge .value { font-size: 14px; font-weight: 700; color: var(--text-main); font-family: 'JetBrains Mono', monospace; margin-top: 2px; }
 
         .icon-btn {
             background: var(--bg-primary); border: 1px solid var(--border-color); color: var(--text-main);
-            width: 36px; height: 36px; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer;
+            width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;
         }
-        .icon-btn:hover { border-color: var(--accent); }
+        .icon-btn:hover { border-color: var(--accent); background: rgba(2, 132, 199, 0.1); }
 
-        .container { max-width: 1400px; margin: 24px auto; padding: 0 24px; }
-        .controls-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 12px; flex-wrap: wrap; }
-        .search-box { position: relative; flex: 1; min-width: 260px; }
+        .container { max-width: 1440px; margin: 32px auto; padding: 0 36px; }
+        .controls-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; gap: 16px; flex-wrap: wrap; }
+        .search-box { position: relative; flex: 1; min-width: 280px; }
         .search-box input {
             width: 100%; background: var(--bg-secondary); border: 1px solid var(--border-color);
-            padding: 10px 14px 10px 38px; border-radius: 6px; color: var(--text-main); font-size: 13px;
+            padding: 12px 16px 12px 42px; border-radius: 8px; color: var(--text-main); font-size: 13px; transition: all 0.2s;
         }
-        .search-box input:focus { outline: none; border-color: var(--accent); }
-        .search-box svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); width: 16px; height: 16px; }
+        .search-box input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15); }
+        .search-box svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); width: 16px; height: 16px; }
 
-        .actions-group { display: flex; gap: 8px; align-items: center; }
-        .filter-tabs { display: flex; gap: 4px; background: var(--bg-secondary); padding: 3px; border-radius: 6px; border: 1px solid var(--border-color); }
-        .tab-btn { background: transparent; border: none; color: var(--text-muted); padding: 6px 10px; font-size: 12px; font-weight: 500; border-radius: 4px; cursor: pointer; }
+        .actions-group { display: flex; gap: 10px; align-items: center; }
+        .filter-tabs { display: flex; gap: 4px; background: var(--bg-secondary); padding: 4px; border-radius: 8px; border: 1px solid var(--border-color); }
+        .tab-btn { background: transparent; border: none; color: var(--text-muted); padding: 8px 14px; font-size: 12px; font-weight: 600; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
         .tab-btn.active, .tab-btn:hover { background: var(--accent); color: white; }
 
         .action-btn {
             background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-main);
-            padding: 8px 12px; font-size: 12px; font-weight: 500; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 6px;
+            padding: 10px 16px; font-size: 12px; font-weight: 600; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s;
         }
-        .action-btn:hover { border-color: var(--accent); }
+        .action-btn:hover { border-color: var(--accent); background: rgba(2, 132, 199, 0.08); }
 
-        .table-wrapper { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius); overflow: hidden; }
+        .table-wrapper { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
         table { width: 100%; border-collapse: collapse; text-align: left; }
-        th { background: rgba(0,0,0,0.15); padding: 14px 16px; font-size: 11px; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--border-color); }
-        td { padding: 14px 16px; border-bottom: 1px solid var(--border-color); font-size: 13px; }
+        th { background: rgba(0,0,0,0.25); padding: 16px 20px; font-size: 11px; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--border-color); letter-spacing: 0.5px; }
+        td { padding: 16px 20px; border-bottom: 1px solid var(--border-color); font-size: 13px; }
         tbody tr:hover { background: rgba(255,255,255,0.02); }
-        tbody tr.rare-military-row { background: rgba(239, 68, 68, 0.08) !important; border-left: 3px solid var(--danger); }
+        tbody tr.rare-military-row { background: rgba(239, 68, 68, 0.06) !important; border-left: 3px solid var(--danger); }
 
         #global-tooltip {
-            position: fixed; background: var(--bg-secondary); border: 1px solid var(--border-color);
-            padding: 10px 14px; border-radius: 6px; width: 240px; box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+            position: fixed; background: var(--bg-card); border: 1px solid var(--border-color);
+            padding: 12px 16px; border-radius: 8px; width: 260px; box-shadow: var(--shadow);
             opacity: 0; visibility: hidden; transition: opacity 0.15s ease; z-index: 99999; pointer-events: none;
         }
         #global-tooltip.visible { opacity: 1; visibility: visible; }
-        #global-tooltip h4 { font-size: 12px; font-weight: 600; margin-bottom: 3px; }
+        #global-tooltip h4 { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
         #global-tooltip p { font-size: 11px; color: var(--text-muted); line-height: 1.4; }
 
         .tooltip-trigger { cursor: help; border-bottom: 1px dashed var(--text-muted); }
         .flight-code { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--accent); }
-        .rego-code { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--success); background: rgba(16,185,129,0.1); padding: 2px 6px; border-radius: 4px; }
+        .rego-code { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--success); background: rgba(16,185,129,0.1); padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(16,185,129,0.2); }
         .time-box { font-family: 'JetBrains Mono', monospace; font-size: 13px; }
-        .date-sub { font-size: 10px; color: var(--text-muted); display: block; }
-        .time-est { color: var(--warning); font-size: 11px; display: block; }
+        .date-sub { font-size: 10px; color: var(--text-muted); display: block; margin-top: 2px; }
+        .time-est { color: var(--warning); font-size: 11px; display: block; margin-top: 2px; }
 
-        .status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
-        .status-on-time { background: rgba(16, 185, 129, 0.1); color: var(--success); }
-        .status-delayed { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
-        .status-neutral { background: rgba(255, 255, 255, 0.05); color: var(--text-muted); }
+        .status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; font-family: 'JetBrains Mono', monospace; }
+        .status-on-time { background: rgba(16, 185, 129, 0.12); color: var(--success); border: 1px solid rgba(16,185,129,0.25); }
+        .status-delayed { background: rgba(245, 158, 11, 0.12); color: var(--warning); border: 1px solid rgba(245,158,11,0.25); }
+        .status-neutral { background: rgba(255, 255, 255, 0.05); color: var(--text-muted); border: 1px solid var(--border-color); }
 
-        .state-container { text-align: center; padding: 50px 20px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
-        .spinner { width: 32px; height: 32px; border: 3px solid var(--border-color); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px auto; }
+        .state-container { text-align: center; padding: 60px 20px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+        .spinner { width: 36px; height: 36px; border: 3px solid var(--border-color); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px auto; }
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
@@ -251,10 +263,10 @@
                     <div class="val" style="color: var(--success);">ONLINE</div>
                 </div>
             </div>
-            <div style="font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 10px; text-transform: uppercase;">
+            <div style="font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">
                 Registered Personnel & Access Control
             </div>
-            <div style="max-height: 280px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 6px;">
+            <div style="max-height: 300px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 8px;">
                 <table class="user-table">
                     <thead>
                         <tr>
@@ -270,32 +282,58 @@
         </div>
     </div>
 
+    <!-- Flynn / User Override Modal -->
+    <div class="modal-overlay" id="overrideModal">
+        <div class="modal-card" style="max-width: 450px;">
+            <div class="modal-header">
+                <h3 id="overrideModalTitle">Control Account</h3>
+                <button class="close-modal" onclick="toggleModal('overrideModal', false)">✕</button>
+            </div>
+            <input type="hidden" id="overrideTargetEmail">
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" id="overrideName" class="auth-input">
+            </div>
+            <div class="form-group" style="margin-top: 16px;">
+                <label>Chat Display Name</label>
+                <input type="text" id="overrideChatName" class="auth-input">
+            </div>
+            <div class="form-group" style="margin-top: 16px;">
+                <label>Rank Title (e.g. peasant, VIP)</label>
+                <input type="text" id="overrideRankName" class="auth-input">
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 24px;">
+                <button class="auth-btn" style="margin: 0;" onclick="saveUserOverride()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
     <div class="modal-overlay" id="settingsModal">
-        <div class="modal-card" style="max-width: 400px;">
+        <div class="modal-card" style="max-width: 420px;">
             <div class="modal-header">
                 <h3>Interface Preferences</h3>
                 <button class="close-modal" onclick="toggleModal('settingsModal', false)">✕</button>
             </div>
             <div class="form-group">
                 <label>Theme Preset</label>
-                <div style="display: flex; gap: 8px; margin-top: 6px;">
+                <div style="display: flex; gap: 8px; margin-top: 8px;">
                     <button class="tab-btn active" style="flex:1;" onclick="setTheme('default', this)">Default</button>
                     <button class="tab-btn" style="flex:1;" onclick="setTheme('navy', this)">Navy</button>
                     <button class="tab-btn" style="flex:1;" onclick="setTheme('mono', this)">Mono</button>
                 </div>
             </div>
-            <div class="form-group" style="margin-top: 16px;">
+            <div class="form-group" style="margin-top: 20px;">
                 <label>Custom Chat Username</label>
-                <div style="display: flex; gap: 8px; margin-top: 6px;">
+                <div style="display: flex; gap: 8px; margin-top: 8px;">
                     <input type="text" id="customChatNameInput" class="auth-input" placeholder="Set your chat username">
-                    <button class="btn-sm" onclick="saveProfileChanges()">Save</button>
+                    <button class="btn-sm btn-primary-admin" onclick="saveProfileChanges()">Save</button>
                 </div>
             </div>
-            <div class="form-group" style="margin-top: 16px;" id="rankNameGroup">
+            <div class="form-group" style="margin-top: 20px;" id="rankNameGroup">
                 <label>Custom Rank / Title</label>
-                <div style="display: flex; gap: 8px; margin-top: 6px;">
+                <div style="display: flex; gap: 8px; margin-top: 8px;">
                     <input type="text" id="customRankNameInput" class="auth-input" placeholder="Set your rank title">
-                    <button class="btn-sm" onclick="saveProfileChanges()">Save</button>
+                    <button class="btn-sm btn-primary-admin" onclick="saveProfileChanges()">Save</button>
                 </div>
             </div>
         </div>
@@ -311,7 +349,7 @@
             <form onsubmit="sendChatMessage(event)">
                 <div class="chat-input-row">
                     <input type="text" id="chatInputText" placeholder="Type a message..." autocomplete="off" required>
-                    <button type="submit" class="btn-sm" style="background: var(--accent); color: white; border: none;">Send</button>
+                    <button type="submit" class="btn-sm btn-primary-admin">Send</button>
                 </div>
             </form>
         </div>
@@ -321,7 +359,7 @@
         <div id="global-tooltip">
             <h4 id="tooltip-title"></h4>
             <p id="tooltip-desc"></p>
-            <div id="tooltip-code" style="margin-top: 4px; font-size: 10px; color: var(--accent); font-family: 'JetBrains Mono', monospace;"></div>
+            <div id="tooltip-code" style="margin-top: 6px; font-size: 10px; color: var(--accent); font-family: 'JetBrains Mono', monospace;"></div>
         </div>
 
         <header>
@@ -540,7 +578,7 @@
                 container.innerHTML = messages.map(m => `
                     <div class="chat-msg">
                         <div class="chat-msg-header">
-                            <span class="chat-msg-sender">${m.sender}</span>
+                            <span class="chat-msg-sender" style="color: ${m.color || '#0284c7'};">${m.sender}</span>
                             <span class="chat-msg-time">${m.time}</span>
                         </div>
                         <div class="chat-msg-text">${m.text}</div>
@@ -560,7 +598,7 @@
                 await fetch('/api/chat/messages', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({sender: `${currentChatName} (${currentRankName})`, text: text})
+                    body: JSON.stringify({email: currentUserEmail, sender: `${currentChatName} (${currentRankName})`, text: text})
                 });
                 input.value = '';
                 fetchMessages();
@@ -609,6 +647,9 @@
                         if (info.status !== 'normal') actionsHtml += `<button class="btn-sm" onclick="updateUserStatus('${email}', 'normal')">Approve</button>`;
                         if (info.status !== 'suspended') actionsHtml += `<button class="btn-sm btn-danger" onclick="updateUserStatus('${email}', 'suspended')">Suspend</button>`;
                         
+                        // Override button for Flynn or any user
+                        actionsHtml += `<button class="btn-sm" style="background: rgba(2,132,199,0.15); color: var(--accent); border-color: rgba(2,132,199,0.3);" onclick="openOverrideModal('${email}', '${info.name}', '${info.chat_name || ''}', '${info.rank_name || ''}')">Control</button>`;
+
                         if (currentUserRole === 'supreme') {
                             if (info.role === 'admin') {
                                 actionsHtml += `<button class="btn-sm" onclick="setUserRole('${email}', 'user')">Demote</button>`;
@@ -626,7 +667,7 @@
                         <td style="font-weight: 500;">${info.name}</td>
                         <td style="color: var(--text-muted); font-family: 'JetBrains Mono', monospace; font-size: 12px;">${email}</td>
                         <td><span class="status-badge ${roleBadgeClass}">${info.rank_name || info.role || info.status}</span></td>
-                        <td style="text-align: right; display: flex; gap: 6px; justify-content: flex-end;">${actionsHtml}</td>
+                        <td style="text-align: right; display: flex; gap: 6px; justify-content: flex-end; align-items: center;">${actionsHtml}</td>
                     `;
                     tbody.appendChild(tr);
                 }
@@ -634,6 +675,40 @@
                 document.getElementById('statPendingUsers').textContent = pendingCount;
                 toggleModal('adminModal', true);
             } catch(err) {}
+        }
+
+        function openOverrideModal(email, name, chatName, rankName) {
+            document.getElementById('overrideTargetEmail').value = email;
+            document.getElementById('overrideName').value = name;
+            document.getElementById('overrideChatName').value = chatName || name;
+            document.getElementById('overrideRankName').value = rankName || 'peasant';
+            document.getElementById('overrideModalTitle').textContent = `Control Account: ${name}`;
+            toggleModal('overrideModal', true);
+        }
+
+        async function saveUserOverride() {
+            const email = document.getElementById('overrideTargetEmail').value;
+            const name = document.getElementById('overrideName').value.trim();
+            const chat_name = document.getElementById('overrideChatName').value.trim();
+            const rank_name = document.getElementById('overrideRankName').value.trim();
+
+            try {
+                const res = await fetch('/api/admin/force-edit-user', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({email, name, chat_name, rank_name})
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    toggleModal('overrideModal', false);
+                    openAdminCenter();
+                    alert("Account profile overridden successfully!");
+                } else {
+                    alert(data.message);
+                }
+            } catch(err) {
+                alert("Connection error.");
+            }
         }
 
         async function updateUserStatus(email, status) {
